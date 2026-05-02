@@ -1,7 +1,7 @@
 {
-  "name": "---",
+  "name": "hw-to-pdf",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-dropzone": "^15.0.0",
+    "react-image-crop": "^11.0.10",
     "sharp": "^0.34.5",
     "vite-plugin-pwa": "^1.2.0"
   },

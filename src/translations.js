@@ -25,6 +25,9 @@ export const translations = {
     qualityLow: "Low",
     rotateImage: "Rotate Image",
     settingsTitle: "PDF Settings",
+    cropImage: "Crop Image",
+    applyCrop: "Apply Crop",
+    cancel: "Cancel"
   },
   ar: {
     title: "تحويل الواجبات إلى PDF",
@@ -57,5 +60,8 @@ export const translations = {
     qualityLow: "منخفضة",
     rotateImage: "تدوير الصورة",
     settingsTitle: "إعدادات الـ PDF",
+    cropImage: "قص الصورة",
+    applyCrop: "تطبيق القص",
+    cancel: "إلغاء"
   }
 };

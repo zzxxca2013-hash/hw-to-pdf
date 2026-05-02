@@ -7,11 +7,12 @@ import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown } from 'luc
 import imageCompression from 'browser-image-compression';
 import { translations } from './translations';
 import SortableImageItem from './components/SortableImageItem';
+import ImageCropper from './components/ImageCropper';
 import './index.css';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState('ar');
   const [theme, setTheme] = useState('light');
   const [enhance, setEnhance] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,6 +23,7 @@ function App() {
   const [quality, setQuality] = useState(0.9);
   const [blackAndWhite, setBlackAndWhite] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [croppingImageId, setCroppingImageId] = useState(null);
 
   const t = translations[lang];
 
@@ -96,6 +98,28 @@ function App() {
     setImages([]);
     setError(null);
     setPdfUrl(null);
+    setCroppingImageId(null);
+  };
+
+  const handleCropComplete = async (base64Image) => {
+    try {
+      // Convert base64 to Blob
+      const res = await fetch(base64Image);
+      const blob = await res.blob();
+      const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+      
+      setImages(prev => prev.map(img => 
+        img.id === croppingImageId 
+          ? { ...img, file, previewUrl: URL.createObjectURL(file), rotation: 0 } 
+          : img
+      ));
+      setPdfUrl(null);
+      setCroppingImageId(null);
+    } catch (err) {
+      console.error('Error applying crop:', err);
+      setError(t.errorProcessing);
+      setCroppingImageId(null);
+    }
   };
 
   const sensors = useSensors(
@@ -216,7 +240,7 @@ function App() {
 
   return (
     <div className="container">
-      <header className="header">
+      <header className="header glass-panel">
         <div className="header-content">
           <h1>{t.title}</h1>
           <p>{t.subtitle}</p>
@@ -231,13 +255,19 @@ function App() {
         </div>
       </header>
 
+      {/* Ad Banner - Top */}
+      <div className="ad-banner glass-panel">
+        <span>Advertisement Space (Top)</span>
+        {/* Insert AdSense Script Here */}
+      </div>
+
       {error && (
         <div style={{ backgroundColor: 'rgba(230,57,70,0.1)', color: 'var(--error-color)', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem', border: '1px solid var(--error-color)' }}>
           {error}
         </div>
       )}
 
-      <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''}`}>
+      <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''}`}>
         <input {...getInputProps()} />
         <ImagePlus className="dropzone-icon" />
         <p>{t.uploadPlaceholder}</p>
@@ -246,8 +276,8 @@ function App() {
 
       {images.length > 0 && (
         <>
-          <div className="actions-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+          <div className="actions-bar glass-panel">
+            <div className="settings-group" style={{ justifyContent: 'space-between', width: '100%' }}>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
                   <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
@@ -273,7 +303,7 @@ function App() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', alignItems: 'center' }}>
+            <div className="settings-group" style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
               <strong style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t.settingsTitle}:</strong>
               
               <div className="toggle-container" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
@@ -290,12 +320,13 @@ function App() {
                 <span style={{ fontSize: '0.875rem' }}>{t.addMargins}</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
                 <span>{t.pdfQuality}:</span>
                 <select 
                   value={quality} 
                   onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }}
-                  style={{ padding: '0.25rem', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)' }}
+                  className="input-field"
+                  style={{ minWidth: '120px' }}
                 >
                   <option value={1.0}>{t.qualityHigh}</option>
                   <option value={0.8}>{t.qualityMedium}</option>
@@ -303,14 +334,15 @@ function App() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', width: '100%', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
                 <span style={{ whiteSpace: 'nowrap' }}>{t.fileNameLabel}</span>
                 <input 
                   type="text" 
                   value={fileName} 
                   onChange={(e) => setFileName(e.target.value)} 
                   placeholder={t.fileNamePlaceholder}
-                  style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', flex: 1, maxWidth: '250px' }}
+                  className="input-field"
+                  style={{ flex: 1 }}
                 />
               </div>
             </div>
@@ -327,6 +359,7 @@ function App() {
                     index={index + 1}
                     onRemove={() => removeImage(img.id)}
                     onRotate={() => rotateImage(img.id)}
+                    onCrop={() => setCroppingImageId(img.id)}
                     rotation={img.rotation}
                     enhanced={enhance}
                   />
@@ -335,17 +368,23 @@ function App() {
             </SortableContext>
           </DndContext>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1.5rem', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={generatePDF} disabled={isProcessing}>
-              <FileDown size={20} />
+              <FileDown size={22} />
               {t.convertToPdf}
             </button>
             {pdfUrl && (
-              <a href={pdfUrl} download={`${fileName || 'homework'}.pdf`} className="btn btn-primary" style={{ backgroundColor: 'var(--success-color)' }}>
-                <Download size={20} />
+              <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
+                <Download size={22} />
                 {t.downloadPdf}
               </a>
             )}
+          </div>
+          
+          {/* Ad Banner - Bottom */}
+          <div className="ad-banner glass-panel" style={{ marginTop: '3rem' }}>
+            <span>Advertisement Space (Bottom)</span>
+            {/* Insert AdSense Script Here */}
           </div>
         </>
       )}
@@ -361,6 +400,15 @@ function App() {
           <div className="spinner"></div>
           <h2>{t.processing}</h2>
         </div>
+      )}
+
+      {croppingImageId && (
+        <ImageCropper 
+          imageUrl={images.find(img => img.id === croppingImageId)?.previewUrl}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setCroppingImageId(null)}
+          t={t}
+        />
       )}
     </div>
   );

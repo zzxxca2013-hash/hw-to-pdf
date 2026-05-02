@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { X, RotateCw } from 'lucide-react';
+import { X, RotateCw, Crop } from 'lucide-react';
 
-const SortableImageItem = ({ id, url, index, onRemove, onRotate, rotation, enhanced }) => {
+const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotation, enhanced }) => {
   const {
     attributes,
     listeners,
@@ -22,26 +22,41 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, rotation, enhan
 
   return (
     <div ref={setNodeRef} style={style} className={`image-card ${enhanced ? 'enhanced' : ''}`} {...attributes} {...listeners}>
-      <button 
-        className="delete-btn" 
-        onClick={(e) => {
-          e.stopPropagation(); // prevent drag start
-          onRemove();
-        }}
-        onPointerDown={(e) => e.stopPropagation()} // prevent drag start on click for touch devices
-      >
-        <X size={16} />
-      </button>
-      <button 
-        className="rotate-btn" 
-        onClick={(e) => {
-          e.stopPropagation();
-          onRotate();
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <RotateCw size={16} />
-      </button>
+      <div className="card-actions">
+        <button 
+          className="action-btn crop" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onCrop();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          title="Crop"
+        >
+          <Crop size={18} />
+        </button>
+        <button 
+          className="action-btn rotate" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onRotate();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          title="Rotate"
+        >
+          <RotateCw size={18} />
+        </button>
+        <button 
+          className="action-btn delete" 
+          onClick={(e) => {
+            e.stopPropagation(); // prevent drag start
+            onRemove();
+          }}
+          onPointerDown={(e) => e.stopPropagation()} // prevent drag start on click for touch devices
+          title="Delete"
+        >
+          <X size={18} />
+        </button>
+      </div>
       <span className="badge">{index}</span>
       <img src={url} alt={`Homework page ${index}`} draggable={false} style={{ transform: `rotate(${rotation || 0}deg)` }} />
     </div>
