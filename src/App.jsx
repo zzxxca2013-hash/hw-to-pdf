@@ -323,85 +323,98 @@ function App() {
 
           {images.length > 0 && (
             <>
-              <div className="actions-bar glass-panel">
-                <div className="settings-group" style={{ justifyContent: 'space-between', width: '100%' }}>
-                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
-                      <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
-                        <div className="toggle-knob"></div>
-                      </div>
-                      <span>{t.enhanceToggle}</span>
-                    </div>
-                    
-                    <div className="toggle-container" onClick={() => setBlackAndWhite(!blackAndWhite)}>
-                      <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
-                        <div className="toggle-knob"></div>
-                      </div>
-                      <span>{t.bwToggle}</span>
+              <div className="settings-grid">
+                {/* Card 1: Image Adjustments */}
+                <div className="setting-card glass-panel">
+                  <div className="setting-card-title">
+                    {lang === 'ar' ? 'تعديل الصور' : 'Image Adjustments'}
+                  </div>
+                  
+                  <div className="setting-row" onClick={() => setEnhance(!enhance)}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.enhanceToggle}</span>
+                    <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
+                      <div className="toggle-knob"></div>
                     </div>
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>{t.imageCount(images.length)}</span>
-                    <button className="btn btn-danger" onClick={clearAll}>
-                      <Trash2 size={18} />
+                  <div className="setting-row" onClick={() => setBlackAndWhite(!blackAndWhite)}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.bwToggle}</span>
+                    <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
+                      <div className="toggle-knob"></div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '600' }}>
+                      {t.imageCount(images.length)}
+                    </span>
+                    <button className="btn btn-danger" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }} onClick={clearAll}>
+                      <Trash2 size={16} />
                       {t.clearAll}
                     </button>
                   </div>
                 </div>
 
-                <div className="settings-group" style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-                  <strong style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t.settingsTitle}:</strong>
+                {/* Card 2: PDF Settings */}
+                <div className="setting-card glass-panel">
+                  <div className="setting-card-title">
+                    {t.settingsTitle}
+                  </div>
                   
-                  <div className="toggle-container" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
-                    <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
+                  <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
+                    <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
-                    <span style={{ fontSize: '0.875rem' }}>{t.addPageNumbers}</span>
                   </div>
 
-                  <div className="toggle-container" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }}>
-                    <div className={`toggle-switch ${addMargins ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
+                  <div className="setting-row" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addMargins}</span>
+                    <div className={`toggle-switch ${addMargins ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
-                    <span style={{ fontSize: '0.875rem' }}>{t.addMargins}</span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-                    <span>{t.pdfQuality}:</span>
+                  <div className="setting-row" style={{ cursor: 'default' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.pdfQuality}</span>
                     <select 
                       value={quality} 
                       onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }}
                       className="input-field"
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}
                     >
                       <option value={1.0}>{t.qualityHigh}</option>
                       <option value={0.8}>{t.qualityMedium}</option>
                       <option value={0.5}>{t.qualityLow}</option>
                     </select>
                   </div>
+                </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
-                    <span style={{ whiteSpace: 'nowrap' }}>{t.fileNameLabel}</span>
+                {/* Card 3: File Details */}
+                <div className="setting-card glass-panel">
+                  <div className="setting-card-title">
+                    {lang === 'ar' ? 'تفاصيل الملف' : 'File Details'}
+                  </div>
+                  
+                  <div className="setting-input-group">
+                    <label>{t.fileNameLabel}</label>
                     <input 
                       type="text" 
                       value={fileName} 
                       onChange={(e) => setFileName(e.target.value)} 
                       placeholder={t.fileNamePlaceholder}
                       className="input-field"
-                      style={{ flex: 1 }}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
-                    <span style={{ whiteSpace: 'nowrap' }}>{t.watermarkLabel}</span>
+                  <div className="setting-input-group">
+                    <label>{t.watermarkLabel}</label>
                     <input 
                       type="text" 
                       value={watermark} 
                       onChange={(e) => { setWatermark(e.target.value); setPdfUrl(null); }} 
                       placeholder={t.watermarkPlaceholder}
                       className="input-field"
-                      style={{ flex: 1 }}
                       maxLength={40}
                     />
                   </div>
