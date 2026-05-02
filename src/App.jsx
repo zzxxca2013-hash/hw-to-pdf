@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { translations } from './translations';
 import SortableImageItem from './components/SortableImageItem';
@@ -26,6 +26,7 @@ function App() {
   const [watermark, setWatermark] = useState('');
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const t = translations[lang];
 
@@ -323,101 +324,31 @@ function App() {
 
           {images.length > 0 && (
             <>
-              <div className="settings-grid">
-                {/* Card 1: Image Adjustments */}
-                <div className="setting-card glass-panel">
-                  <div className="setting-card-title">
-                    {lang === 'ar' ? 'تعديل الصور' : 'Image Adjustments'}
-                  </div>
-                  
-                  <div className="setting-row" onClick={() => setEnhance(!enhance)}>
+              <div className="toolbar glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', marginBottom: '1.5rem', borderRadius: '12px', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                  <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.enhanceToggle}</span>
                     <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
                   </div>
                   
-                  <div className="setting-row" onClick={() => setBlackAndWhite(!blackAndWhite)}>
+                  <div className="toggle-container" onClick={() => setBlackAndWhite(!blackAndWhite)}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.bwToggle}</span>
                     <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
                   </div>
-
-                  <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '600' }}>
-                      {t.imageCount(images.length)}
-                    </span>
-                    <button className="btn btn-danger" style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem' }} onClick={clearAll}>
-                      <Trash2 size={16} />
-                      {t.clearAll}
-                    </button>
-                  </div>
                 </div>
 
-                {/* Card 2: PDF Settings */}
-                <div className="setting-card glass-panel">
-                  <div className="setting-card-title">
-                    {t.settingsTitle}
-                  </div>
-                  
-                  <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
-                    <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`}>
-                      <div className="toggle-knob"></div>
-                    </div>
-                  </div>
-
-                  <div className="setting-row" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addMargins}</span>
-                    <div className={`toggle-switch ${addMargins ? 'active' : ''}`}>
-                      <div className="toggle-knob"></div>
-                    </div>
-                  </div>
-
-                  <div className="setting-row" style={{ cursor: 'default' }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.pdfQuality}</span>
-                    <select 
-                      value={quality} 
-                      onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }}
-                      className="input-field"
-                      style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}
-                    >
-                      <option value={1.0}>{t.qualityHigh}</option>
-                      <option value={0.8}>{t.qualityMedium}</option>
-                      <option value={0.5}>{t.qualityLow}</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Card 3: File Details */}
-                <div className="setting-card glass-panel">
-                  <div className="setting-card-title">
-                    {lang === 'ar' ? 'تفاصيل الملف' : 'File Details'}
-                  </div>
-                  
-                  <div className="setting-input-group">
-                    <label>{t.fileNameLabel}</label>
-                    <input 
-                      type="text" 
-                      value={fileName} 
-                      onChange={(e) => setFileName(e.target.value)} 
-                      placeholder={t.fileNamePlaceholder}
-                      className="input-field"
-                    />
-                  </div>
-
-                  <div className="setting-input-group">
-                    <label>{t.watermarkLabel}</label>
-                    <input 
-                      type="text" 
-                      value={watermark} 
-                      onChange={(e) => { setWatermark(e.target.value); setPdfUrl(null); }} 
-                      placeholder={t.watermarkPlaceholder}
-                      className="input-field"
-                      maxLength={40}
-                    />
-                  </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '600' }}>
+                    {t.imageCount(images.length)}
+                  </span>
+                  <button className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={clearAll}>
+                    <Trash2 size={16} />
+                    {t.clearAll}
+                  </button>
                 </div>
               </div>
 
@@ -442,11 +373,12 @@ function App() {
               </DndContext>
 
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1.5rem', flexWrap: 'wrap' }}>
-                <button className="btn btn-primary" onClick={generatePDF} disabled={isProcessing}>
-                  <FileDown size={22} />
-                  {t.convertToPdf}
-                </button>
-                {pdfUrl && (
+                {!pdfUrl ? (
+                  <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)} disabled={isProcessing}>
+                    <FileDown size={22} />
+                    {t.convertToPdf}
+                  </button>
+                ) : (
                   <>
                     <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
                       <Download size={22} />
@@ -454,6 +386,9 @@ function App() {
                     </a>
                     <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
                       {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)}>
+                      {lang === 'ar' ? 'تعديل الخيارات' : 'Edit Options'}
                     </button>
                   </>
                 )}
@@ -507,6 +442,59 @@ function App() {
           onCancel={() => setCroppingImageId(null)}
           t={t}
         />
+      )}
+
+      {showSettingsModal && (
+        <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t.settingsTitle}</h3>
+              <button className="icon-button" onClick={() => setShowSettingsModal(false)}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              <div className="setting-card glass-panel" style={{ padding: '1rem' }}>
+                <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
+                  <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`}><div className="toggle-knob"></div></div>
+                </div>
+                <div className="setting-row" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }} style={{ marginTop: '1rem' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addMargins}</span>
+                  <div className={`toggle-switch ${addMargins ? 'active' : ''}`}><div className="toggle-knob"></div></div>
+                </div>
+                <div className="setting-row" style={{ marginTop: '1rem', cursor: 'default' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.pdfQuality}</span>
+                  <select value={quality} onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }} className="input-field" style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}>
+                    <option value={1.0}>{t.qualityHigh}</option>
+                    <option value={0.8}>{t.qualityMedium}</option>
+                    <option value={0.5}>{t.qualityLow}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="setting-card glass-panel" style={{ padding: '1rem' }}>
+                <div className="setting-input-group">
+                  <label>{t.fileNameLabel}</label>
+                  <input type="text" value={fileName} onChange={(e) => setFileName(e.target.value)} placeholder={t.fileNamePlaceholder} className="input-field" />
+                </div>
+                <div className="setting-input-group" style={{ marginTop: '1rem' }}>
+                  <label>{t.watermarkLabel}</label>
+                  <input type="text" value={watermark} onChange={(e) => { setWatermark(e.target.value); setPdfUrl(null); }} placeholder={t.watermarkPlaceholder} className="input-field" maxLength={40} />
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-actions">
+              <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowSettingsModal(false)}>
+                {t.cancel}
+              </button>
+              <button className="btn btn-primary" onClick={() => { setShowSettingsModal(false); generatePDF(); }} disabled={isProcessing}>
+                <FileDown size={20} />
+                {t.convertToPdf}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Footer */}
