@@ -23,6 +23,7 @@ function App() {
   const [quality, setQuality] = useState(0.9);
   const [blackAndWhite, setBlackAndWhite] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [watermark, setWatermark] = useState('');
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
 
@@ -192,6 +193,22 @@ function App() {
         if (filterStr) ctx.filter = filterStr.trim();
         
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        
+        if (watermark) {
+          ctx.setTransform(1, 0, 0, 1, 0, 0); 
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(-Math.PI / 4);
+          const fontSize = Math.floor(Math.min(canvas.width, canvas.height) / 12);
+          ctx.font = `bold ${fontSize}px Cairo, Inter, sans-serif`;
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = Math.max(2, fontSize / 25);
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.strokeText(watermark, 0, 0);
+          ctx.fillText(watermark, 0, 0);
+        }
+
         resolve(canvas.toDataURL('image/jpeg', quality));
       };
       img.onerror = reject;
@@ -373,6 +390,19 @@ function App() {
                       placeholder={t.fileNamePlaceholder}
                       className="input-field"
                       style={{ flex: 1 }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
+                    <span style={{ whiteSpace: 'nowrap' }}>{t.watermarkLabel}</span>
+                    <input 
+                      type="text" 
+                      value={watermark} 
+                      onChange={(e) => { setWatermark(e.target.value); setPdfUrl(null); }} 
+                      placeholder={t.watermarkPlaceholder}
+                      className="input-field"
+                      style={{ flex: 1 }}
+                      maxLength={40}
                     />
                   </div>
                 </div>
