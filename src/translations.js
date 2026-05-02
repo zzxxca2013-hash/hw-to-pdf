@@ -29,6 +29,8 @@ export const translations = {
     closePreview: "Close Preview",
     previewTitle: "Image Preview",
     printPdf: "Print PDF",
+    dragHint: "Tip: Drag images to reorder them",
+    shareApp: "Share App",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
     addMargins: "Page Margins",
@@ -81,6 +83,8 @@ export const translations = {
     closePreview: "إغلاق المعاينة",
     previewTitle: "معاينة الصور",
     printPdf: "طباعة الـ PDF",
+    dragHint: "تلميح: اسحب الصور لإعادة ترتيبها",
+    shareApp: "مشاركة التطبيق",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";
       if (count === 2) return "صورتان";

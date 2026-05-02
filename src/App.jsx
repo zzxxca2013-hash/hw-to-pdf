@@ -79,6 +79,20 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowSettingsModal(false);
+        setShowPreviewModal(false);
+        setShowClearConfirm(false);
+        setCroppingImageId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Toast auto-hide
   useEffect(() => {
     if (error || success) {
@@ -404,6 +418,22 @@ function App() {
     }
   };
 
+  const handleShareApp = async () => {
+    if (navigator.canShare) {
+      try {
+        await navigator.share({
+          title: t.title,
+          text: t.seoDescription || t.subtitle,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.error('Share App failed:', err);
+      }
+    } else {
+      alert(lang === 'ar' ? 'انسخ هذا الرابط لمشاركته: ' + window.location.href : 'Copy this link to share: ' + window.location.href);
+    }
+  };
+
   return (
     <div className="container">
       <header className="header glass-panel">
@@ -482,6 +512,12 @@ function App() {
                   </button>
                 </div>
               </div>
+
+              {images.length > 1 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem', fontStyle: 'italic' }}>
+                  {t.dragHint}
+                </p>
+              )}
 
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <SortableContext items={images.map(i => i.id)} strategy={rectSortingStrategy}>
@@ -705,6 +741,7 @@ function App() {
           <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('privacy')}>{t.privacyPolicy}</span>
           <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('terms')}>{t.termsOfUse}</span>
           <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('contact')}>{t.contactUs}</span>
+          <span style={{ cursor: 'pointer', color: 'var(--primary-color)', fontWeight: '500' }} onClick={handleShareApp}>{t.shareApp}</span>
         </div>
         <p>© {new Date().getFullYear()} {t.title}. All rights reserved.</p>
       </footer>
