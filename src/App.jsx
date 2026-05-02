@@ -24,6 +24,7 @@ function App() {
   const [blackAndWhite, setBlackAndWhite] = useState(false);
   const [fileName, setFileName] = useState('');
   const [croppingImageId, setCroppingImageId] = useState(null);
+  const [activePage, setActivePage] = useState('home');
 
   const t = translations[lang];
 
@@ -288,144 +289,166 @@ function App() {
         {/* Insert AdSense Script Here */}
       </div>
 
-      {error && (
-        <div style={{ backgroundColor: 'rgba(230,57,70,0.1)', color: 'var(--error-color)', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem', border: '1px solid var(--error-color)' }}>
-          {error}
-        </div>
-      )}
-
-      <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''}`}>
-        <input {...getInputProps()} />
-        <ImagePlus className="dropzone-icon" />
-        <p>{t.uploadPlaceholder}</p>
-        <span className="help-text">{t.uploadHelp}</span>
-      </div>
-
-      {images.length > 0 && (
+      {activePage === 'home' ? (
         <>
-          <div className="actions-bar glass-panel">
-            <div className="settings-group" style={{ justifyContent: 'space-between', width: '100%' }}>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
-                  <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
-                    <div className="toggle-knob"></div>
-                  </div>
-                  <span>{t.enhanceToggle}</span>
-                </div>
-                
-                <div className="toggle-container" onClick={() => setBlackAndWhite(!blackAndWhite)}>
-                  <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
-                    <div className="toggle-knob"></div>
-                  </div>
-                  <span>{t.bwToggle}</span>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-muted)' }}>{t.imageCount(images.length)}</span>
-                <button className="btn btn-danger" onClick={clearAll}>
-                  <Trash2 size={18} />
-                  {t.clearAll}
-                </button>
-              </div>
+          {error && (
+            <div style={{ backgroundColor: 'rgba(230,57,70,0.1)', color: 'var(--error-color)', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem', border: '1px solid var(--error-color)' }}>
+              {error}
             </div>
+          )}
 
-            <div className="settings-group" style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-              <strong style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t.settingsTitle}:</strong>
-              
-              <div className="toggle-container" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
-                <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
-                  <div className="toggle-knob"></div>
-                </div>
-                <span style={{ fontSize: '0.875rem' }}>{t.addPageNumbers}</span>
-              </div>
-
-              <div className="toggle-container" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }}>
-                <div className={`toggle-switch ${addMargins ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
-                  <div className="toggle-knob"></div>
-                </div>
-                <span style={{ fontSize: '0.875rem' }}>{t.addMargins}</span>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
-                <span>{t.pdfQuality}:</span>
-                <select 
-                  value={quality} 
-                  onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }}
-                  className="input-field"
-                  style={{ minWidth: '120px' }}
-                >
-                  <option value={1.0}>{t.qualityHigh}</option>
-                  <option value={0.8}>{t.qualityMedium}</option>
-                  <option value={0.5}>{t.qualityLow}</option>
-                </select>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
-                <span style={{ whiteSpace: 'nowrap' }}>{t.fileNameLabel}</span>
-                <input 
-                  type="text" 
-                  value={fileName} 
-                  onChange={(e) => setFileName(e.target.value)} 
-                  placeholder={t.fileNamePlaceholder}
-                  className="input-field"
-                  style={{ flex: 1 }}
-                />
-              </div>
-            </div>
+          <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''}`}>
+            <input {...getInputProps()} />
+            <ImagePlus className="dropzone-icon" />
+            <p>{t.uploadPlaceholder}</p>
+            <span className="help-text">{t.uploadHelp}</span>
           </div>
 
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={images.map(i => i.id)} strategy={rectSortingStrategy}>
-              <div className="images-grid">
-                {images.map((img, index) => (
-                  <SortableImageItem 
-                    key={img.id} 
-                    id={img.id} 
-                    url={img.previewUrl} 
-                    index={index + 1}
-                    onRemove={() => removeImage(img.id)}
-                    onRotate={() => rotateImage(img.id)}
-                    onCrop={() => setCroppingImageId(img.id)}
-                    rotation={img.rotation}
-                    enhanced={enhance}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          {images.length > 0 && (
+            <>
+              <div className="actions-bar glass-panel">
+                <div className="settings-group" style={{ justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
+                      <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
+                        <div className="toggle-knob"></div>
+                      </div>
+                      <span>{t.enhanceToggle}</span>
+                    </div>
+                    
+                    <div className="toggle-container" onClick={() => setBlackAndWhite(!blackAndWhite)}>
+                      <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
+                        <div className="toggle-knob"></div>
+                      </div>
+                      <span>{t.bwToggle}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{t.imageCount(images.length)}</span>
+                    <button className="btn btn-danger" onClick={clearAll}>
+                      <Trash2 size={18} />
+                      {t.clearAll}
+                    </button>
+                  </div>
+                </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={generatePDF} disabled={isProcessing}>
-              <FileDown size={22} />
-              {t.convertToPdf}
-            </button>
-            {pdfUrl && (
-              <>
-                <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
-                  <Download size={22} />
-                  {t.downloadPdf}
-                </a>
-                <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
-                  {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
+                <div className="settings-group" style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                  <strong style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{t.settingsTitle}:</strong>
+                  
+                  <div className="toggle-container" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
+                    <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
+                      <div className="toggle-knob"></div>
+                    </div>
+                    <span style={{ fontSize: '0.875rem' }}>{t.addPageNumbers}</span>
+                  </div>
+
+                  <div className="toggle-container" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }}>
+                    <div className={`toggle-switch ${addMargins ? 'active' : ''}`} style={{ transform: 'scale(0.8)' }}>
+                      <div className="toggle-knob"></div>
+                    </div>
+                    <span style={{ fontSize: '0.875rem' }}>{t.addMargins}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+                    <span>{t.pdfQuality}:</span>
+                    <select 
+                      value={quality} 
+                      onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }}
+                      className="input-field"
+                      style={{ minWidth: '120px' }}
+                    >
+                      <option value={1.0}>{t.qualityHigh}</option>
+                      <option value={0.8}>{t.qualityMedium}</option>
+                      <option value={0.5}>{t.qualityLow}</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', flex: 1, minWidth: '250px' }}>
+                    <span style={{ whiteSpace: 'nowrap' }}>{t.fileNameLabel}</span>
+                    <input 
+                      type="text" 
+                      value={fileName} 
+                      onChange={(e) => setFileName(e.target.value)} 
+                      placeholder={t.fileNamePlaceholder}
+                      className="input-field"
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={images.map(i => i.id)} strategy={rectSortingStrategy}>
+                  <div className="images-grid">
+                    {images.map((img, index) => (
+                      <SortableImageItem 
+                        key={img.id} 
+                        id={img.id} 
+                        url={img.previewUrl} 
+                        index={index + 1}
+                        onRemove={() => removeImage(img.id)}
+                        onRotate={() => rotateImage(img.id)}
+                        onCrop={() => setCroppingImageId(img.id)}
+                        rotation={img.rotation}
+                        enhanced={enhance}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <button className="btn btn-primary" onClick={generatePDF} disabled={isProcessing}>
+                  <FileDown size={22} />
+                  {t.convertToPdf}
                 </button>
-              </>
-            )}
-          </div>
-          
-          {/* Ad Banner - Bottom */}
-          <div className="ad-banner glass-panel" style={{ marginTop: '3rem' }}>
-            <span>Advertisement Space (Bottom)</span>
-            {/* Insert AdSense Script Here */}
+                {pdfUrl && (
+                  <>
+                    <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
+                      <Download size={22} />
+                      {t.downloadPdf}
+                    </a>
+                    <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
+                      {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+
+          {images.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+              <p>{t.noImages}</p>
+            </div>
+          )}
+
+          {/* SEO Text Section for AdSense */}
+          <div className="seo-section glass-panel" style={{ marginTop: '3rem', padding: '2rem', textAlign: 'start' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>{t.seoTitle}</h2>
+            <p style={{ color: 'var(--text-muted)', lineHeight: '1.8' }}>{t.seoText}</p>
           </div>
         </>
-      )}
-
-      {images.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-          <p>{t.noImages}</p>
+      ) : (
+        <div className="page-content glass-panel" style={{ padding: '2.5rem', textAlign: 'start', minHeight: '50vh' }}>
+          <button className="btn btn-primary" onClick={() => setActivePage('home')} style={{ marginBottom: '2rem' }}>
+            {t.home}
+          </button>
+          <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>
+            {activePage === 'privacy' ? t.privacyPolicy : activePage === 'terms' ? t.termsOfUse : t.contactUs}
+          </h2>
+          <p style={{ color: 'var(--text-main)', lineHeight: '2', fontSize: '1.1rem' }}>
+            {activePage === 'privacy' ? t.privacyText : activePage === 'terms' ? t.termsText : t.contactText}
+          </p>
         </div>
       )}
+
+      {/* Ad Banner - Bottom */}
+      <div className="ad-banner glass-panel" style={{ marginTop: '3rem' }}>
+        <span>Advertisement Space (Bottom)</span>
+        {/* Insert AdSense Script Here */}
+      </div>
 
       {isProcessing && (
         <div className="loading-overlay">
@@ -442,6 +465,16 @@ function App() {
           t={t}
         />
       )}
+
+      {/* Footer */}
+      <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('privacy')}>{t.privacyPolicy}</span>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('terms')}>{t.termsOfUse}</span>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('contact')}>{t.contactUs}</span>
+        </div>
+        <p>© {new Date().getFullYear()} {t.title}. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
