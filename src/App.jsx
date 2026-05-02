@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -21,6 +21,7 @@ function App() {
   const [processingText, setProcessingText] = useState('');
   const [error, setError] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfBlob, setPdfBlob] = useState(null);
   const [addPageNumbers, setAddPageNumbers] = useState(false);
   const [addMargins, setAddMargins] = useState(false);
   const [quality, setQuality] = useState(0.9);
@@ -264,6 +265,7 @@ function App() {
     setProgress(0);
     setError(null);
     setPdfUrl(null);
+    setPdfBlob(null);
 
     try {
       const pdf = new jsPDF({
@@ -316,9 +318,10 @@ function App() {
 
       setProcessingText(lang === 'ar' ? 'جاري إنشاء ملف الـ PDF النهائي...' : 'Finalizing PDF file...');
       
-      const pdfBlob = pdf.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
+      const generatedBlob = pdf.output('blob');
+      const url = URL.createObjectURL(generatedBlob);
       setPdfUrl(url);
+      setPdfBlob(generatedBlob);
       
       confetti({
         particleCount: 150,
@@ -334,6 +337,26 @@ function App() {
       setIsProcessing(false);
       setProgress(0);
       setProcessingText('');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!pdfBlob) return;
+    
+    const file = new File([pdfBlob], `${fileName || getSmartFilename()}.pdf`, { type: 'application/pdf' });
+    
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: fileName || getSmartFilename(),
+          text: t.subtitle,
+          files: [file]
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      alert(lang === 'ar' ? 'عذراً، متصفحك أو جهازك لا يدعم مشاركة الملفات المباشرة.' : 'Sorry, your browser does not support direct file sharing.');
     }
   };
 
@@ -451,6 +474,14 @@ function App() {
                       <Download size={22} />
                       {t.downloadPdf}
                     </a>
+                    
+                    {typeof navigator !== 'undefined' && navigator.canShare && (
+                      <button className="btn" style={{ background: '#3b82f6', color: 'white' }} onClick={handleShare}>
+                        <Share2 size={22} />
+                        {t.sharePdf || 'Share PDF'}
+                      </button>
+                    )}
+
                     <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
                       {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
                     </button>
