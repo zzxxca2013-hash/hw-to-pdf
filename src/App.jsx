@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -44,6 +44,7 @@ function App() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const iframeRef = useRef(null);
 
   const t = translations[lang];
@@ -104,6 +105,18 @@ function App() {
     }
   }, [error, success]);
 
+  // Offline status tracking
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
@@ -163,6 +176,14 @@ function App() {
     },
     noClick: images.length > 0
   });
+
+  const handleCameraChange = async (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      await onDrop(files);
+      e.target.value = null;
+    }
+  };
 
   const removeImage = (id) => {
     setImages(prev => {
@@ -458,6 +479,12 @@ function App() {
               <span className="hide-on-mobile">{t.installApp || 'Install App'}</span>
             </button>
           )}
+          {!isOnline && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(0,0,0,0.05)', borderRadius: '20px' }}>
+              <WifiOff size={16} />
+              <span className="hide-on-mobile">{t.offlineMode}</span>
+            </div>
+          )}
           <button className="icon-button" onClick={toggleLang} aria-label={t.toggleLang} title={t.toggleLang}>
             <Languages size={24} />
           </button>
@@ -479,11 +506,23 @@ function App() {
             {error || success}
           </div>
 
-          <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''} ${images.length === 0 ? 'empty-state' : ''}`}>
-            <input {...getInputProps()} />
-            <ImagePlus className="dropzone-icon" />
-            <p>{t.uploadPlaceholder}</p>
-            <span className="help-text">{t.uploadHelp}</span>
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexDirection: 'column' }}>
+            <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''} ${images.length === 0 ? 'empty-state' : ''}`} style={{ marginBottom: 0 }}>
+              <input {...getInputProps()} />
+              <ImagePlus className="dropzone-icon" />
+              <p>{t.uploadPlaceholder}</p>
+              <span className="help-text">{t.uploadHelp}</span>
+            </div>
+            
+            {images.length === 0 && (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <input type="file" accept="image/*" capture="environment" id="cameraInput" style={{ display: 'none' }} onChange={handleCameraChange} multiple />
+                <label htmlFor="cameraInput" className="btn btn-primary" style={{ cursor: 'pointer', padding: '0.8rem 1.5rem', borderRadius: '20px' }}>
+                  <Camera size={20} />
+                  {t.takePhoto}
+                </label>
+              </div>
+            )}
           </div>
 
           {images.length > 0 && (
