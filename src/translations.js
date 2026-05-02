@@ -31,6 +31,9 @@ export const translations = {
     printPdf: "Print PDF",
     dragHint: "Tip: Drag images to reorder them",
     shareApp: "Share App",
+    toggleLang: "Switch to Arabic",
+    toggleTheme: "Toggle Light/Dark Theme",
+    maxImagesError: "Sorry, the maximum limit is 100 images per PDF.",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
     addMargins: "Page Margins",
@@ -85,6 +88,9 @@ export const translations = {
     printPdf: "طباعة الـ PDF",
     dragHint: "تلميح: اسحب الصور لإعادة ترتيبها",
     shareApp: "مشاركة التطبيق",
+    toggleLang: "التبديل للإنجليزية",
+    toggleTheme: "تغيير المظهر (فاتح/داكن)",
+    maxImagesError: "عذراً، الحد الأقصى هو 100 صورة للملف الواحد.",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";
       if (count === 2) return "صورتان";

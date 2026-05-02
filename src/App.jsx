@@ -108,6 +108,11 @@ function App() {
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const onDrop = useCallback(async (acceptedFiles) => {
+    if (images.length + acceptedFiles.length > 100) {
+      setError(t.maxImagesError);
+      return;
+    }
+
     setError(null);
     setPdfUrl(null);
     setIsProcessing(true);
@@ -450,13 +455,13 @@ function App() {
           {deferredPrompt && (
             <button className="btn btn-primary" onClick={handleInstallApp} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderRadius: '20px', gap: '0.4rem' }}>
               <DownloadCloud size={18} />
-              <span className="hide-on-mobile">{t.installApp || 'Install'}</span>
+              <span className="hide-on-mobile">{t.installApp || 'Install App'}</span>
             </button>
           )}
-          <button className="icon-button" onClick={toggleLang} aria-label="Toggle Language" title="Toggle Language">
+          <button className="icon-button" onClick={toggleLang} aria-label={t.toggleLang} title={t.toggleLang}>
             <Languages size={24} />
           </button>
-          <button className="icon-button" onClick={toggleTheme} aria-label="Toggle Theme" title="Toggle Theme">
+          <button className="icon-button" onClick={toggleTheme} aria-label={t.toggleTheme} title={t.toggleTheme}>
             {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
           </button>
         </div>
