@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
-import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import SortableImageItem from './components/SortableImageItem';
 import ImageCropper from './components/ImageCropper';
@@ -16,6 +17,8 @@ function App() {
   const [theme, setTheme] = useState('light');
   const [enhance, setEnhance] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [processingText, setProcessingText] = useState('');
   const [error, setError] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [addPageNumbers, setAddPageNumbers] = useState(false);
@@ -27,8 +30,28 @@ function App() {
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const t = translations[lang];
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
 
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -82,11 +105,16 @@ function App() {
     } finally {
       setIsProcessing(false);
     }
-  }, [t]);
+  }, [images]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    accept: { 'image/*': ['.jpeg', '.jpg', '.png'] }
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/webp': []
+    },
+    noClick: images.length > 0
   });
 
   const removeImage = (id) => {
@@ -149,8 +177,7 @@ function App() {
   };
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -224,7 +251,9 @@ function App() {
     }
     
     setIsProcessing(true);
+    setProgress(0);
     setError(null);
+    setPdfUrl(null);
 
     try {
       const pdf = new jsPDF({
@@ -237,9 +266,12 @@ function App() {
       const pageHeight = pdf.internal.pageSize.getHeight();
 
       for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        setProcessingText(lang === 'ar' ? `جاري معالجة الصورة ${i + 1} من ${images.length}...` : `Processing image ${i + 1} of ${images.length}...`);
+        
         if (i > 0) pdf.addPage();
         
-        const dataUrl = await processImageForPDF(images[i].previewUrl, images[i].rotation);
+        const dataUrl = await processImageForPDF(img.previewUrl, img.rotation);
         
         const margin = addMargins ? 10 : 0;
         const availableWidth = pageWidth - (margin * 2);
@@ -265,22 +297,33 @@ function App() {
 
         if (addPageNumbers) {
           pdf.setFontSize(10);
-          pdf.setTextColor(100);
+          pdf.setTextColor(128, 128, 128);
           pdf.text(`${i + 1}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
         }
+        
+        setProgress(Math.round(((i + 1) / images.length) * 100));
       }
 
+      setProcessingText(lang === 'ar' ? 'جاري إنشاء ملف الـ PDF النهائي...' : 'Finalizing PDF file...');
+      
       const pdfBlob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      setPdfUrl(prev => {
-        if (prev) URL.revokeObjectURL(prev);
-        return blobUrl;
+      const url = URL.createObjectURL(pdfBlob);
+      setPdfUrl(url);
+      
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#6366f1', '#ec4899', '#10b981', '#f59e0b'],
+        zIndex: 3000
       });
     } catch (err) {
       console.error(err);
       setError(t.errorProcessing);
     } finally {
       setIsProcessing(false);
+      setProgress(0);
+      setProcessingText('');
     }
   };
 
@@ -292,6 +335,12 @@ function App() {
           <p>{t.subtitle}</p>
         </div>
         <div className="controls">
+          {deferredPrompt && (
+            <button className="btn btn-primary" onClick={handleInstallApp} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderRadius: '20px', gap: '0.4rem' }}>
+              <DownloadCloud size={18} />
+              <span className="hide-on-mobile">{t.installApp || 'Install'}</span>
+            </button>
+          )}
           <button className="icon-button" onClick={toggleLang} aria-label="Toggle Language" title="Toggle Language">
             <Languages size={24} />
           </button>
@@ -368,6 +417,14 @@ function App() {
                         enhanced={enhance}
                       />
                     ))}
+                    <div 
+                      className="image-card" 
+                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px dashed var(--primary-color)', background: 'rgba(99, 102, 241, 0.05)' }} 
+                      onClick={open}
+                    >
+                      <Plus size={40} color="var(--primary-color)" style={{ marginBottom: '0.5rem' }} />
+                      <span style={{ color: 'var(--primary-color)', fontWeight: '600' }}>{t.addMoreImages}</span>
+                    </div>
                   </div>
                 </SortableContext>
               </DndContext>
@@ -431,7 +488,15 @@ function App() {
       {isProcessing && (
         <div className="loading-overlay">
           <div className="spinner"></div>
-          <h2>{t.processing}</h2>
+          <h2 style={{ marginBottom: progress > 0 ? '1rem' : '0' }}>{t.processing}</h2>
+          {progress > 0 && (
+            <div style={{ width: '80%', maxWidth: '300px', textAlign: 'center' }}>
+              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                <div style={{ height: '100%', width: `${progress}%`, background: 'var(--primary-color)', transition: 'width 0.3s ease' }}></div>
+              </div>
+              <p style={{ fontSize: '0.9rem', opacity: 0.9 }}>{processingText}</p>
+            </div>
+          )}
         </div>
       )}
 
