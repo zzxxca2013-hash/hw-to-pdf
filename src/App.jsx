@@ -25,7 +25,14 @@ function App() {
   const [addMargins, setAddMargins] = useState(false);
   const [quality, setQuality] = useState(0.9);
   const [blackAndWhite, setBlackAndWhite] = useState(false);
-  const [fileName, setFileName] = useState('');
+  
+  const getSmartFilename = () => {
+    const d = new Date();
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return lang === 'ar' ? `واجب_${dateStr}` : `Homework_${dateStr}`;
+  };
+
+  const [fileName, setFileName] = useState(getSmartFilename());
   const [watermark, setWatermark] = useState('');
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
@@ -56,6 +63,9 @@ function App() {
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
+    if (!fileName || fileName.startsWith('واجب_') || fileName.startsWith('Homework_')) {
+      setFileName(getSmartFilename());
+    }
   }, [lang]);
 
   useEffect(() => {
@@ -437,7 +447,7 @@ function App() {
                   </button>
                 ) : (
                   <>
-                    <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
+                    <a href={pdfUrl} download={`${fileName || getSmartFilename()}.pdf`} className="btn btn-success">
                       <Download size={22} />
                       {t.downloadPdf}
                     </a>
@@ -571,6 +581,11 @@ function App() {
         </div>
         <p>© {new Date().getFullYear()} {t.title}. All rights reserved.</p>
       </footer>
+
+      {/* Mobile AdSense Anchor Placeholder */}
+      <div className="mobile-ad-anchor">
+        {lang === 'ar' ? 'مساحة إعلان AdSense' : 'AdSense Banner Space'}
+      </div>
     </div>
   );
 }
