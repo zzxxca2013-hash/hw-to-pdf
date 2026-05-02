@@ -640,22 +640,24 @@ body::before {
 
 .toast {
   position: fixed;
-  bottom: 2rem;
+  top: 1.5rem;
+  bottom: auto;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--card-bg);
-  backdrop-filter: var(--glass-blur);
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-hover);
+  transform: translateX(-50%) translateY(-100px);
+  background: var(--text-main);
+  color: var(--bg-color);
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   z-index: 3000;
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .toast.show {
@@ -664,12 +666,12 @@ body::before {
 }
 
 .toast.error {
-  border-left: 4px solid var(--error-color);
-  color: var(--error-color);
+  background: var(--error-color);
+  color: white;
 }
 .toast.success {
-  border-left: 4px solid var(--success-color);
-  color: var(--success-color);
+  background: var(--success-color);
+  color: white;
 }
 
 .modal-header {
