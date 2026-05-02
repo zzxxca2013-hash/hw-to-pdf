@@ -57,9 +57,63 @@ body::before {
   top: 0; left: 0; right: 0; bottom: 0;
   background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
   background-size: 24px 24px;
-  opacity: 0.1;
+  opacity: 0.08;
   pointer-events: none;
   z-index: -1;
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Animated Mesh Background Blobs */
+.bg-blobs {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+  z-index: -2;
+  pointer-events: none;
+}
+.bg-blob-1, .bg-blob-2 {
+  position: absolute;
+  filter: blur(100px);
+  opacity: 0.3;
+  border-radius: 50%;
+  animation: float 20s infinite ease-in-out alternate;
+}
+.bg-blob-1 {
+  width: 50vw; height: 50vw;
+  max-width: 600px; max-height: 600px;
+  background: var(--primary-color);
+  top: -10vw; left: -10vw;
+}
+.bg-blob-2 {
+  width: 40vw; height: 40vw;
+  max-width: 500px; max-height: 500px;
+  background: var(--secondary-color);
+  bottom: -5vw; right: -5vw;
+  animation-delay: -10s;
+}
+[data-theme='dark'] .bg-blob-1, [data-theme='dark'] .bg-blob-2 {
+  opacity: 0.15;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(5vw, 5vw) scale(1.1); }
+  100% { transform: translate(-5vw, 10vw) scale(0.9); }
 }
 
 [dir='rtl'] body {

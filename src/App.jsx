@@ -435,8 +435,13 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <header className="header glass-panel">
+    <>
+      <div className="bg-blobs">
+        <div className="bg-blob-1"></div>
+        <div className="bg-blob-2"></div>
+      </div>
+      <div className="container">
+        <header className="header glass-panel">
         <div className="header-content">
           <h1>{t.title}</h1>
           <p>{t.subtitle}</p>
@@ -751,6 +756,7 @@ function App() {
         {lang === 'ar' ? 'مساحة إعلان AdSense' : 'AdSense Banner Space'}
       </div>
     </div>
+    </>
   );
 }
 
