@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -201,6 +201,18 @@ function App() {
     setImages(prev => prev.map(img => 
       img.id === id ? { ...img, rotation: (img.rotation + 90) % 360 } : img
     ));
+    setPdfUrl(null);
+  };
+
+  const autoSortImages = () => {
+    setImages(prev => {
+      const sorted = [...prev].sort((a, b) => {
+        const nameA = a.file.name.toLowerCase();
+        const nameB = b.file.name.toLowerCase();
+        return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' });
+      });
+      return sorted;
+    });
     setPdfUrl(null);
   };
 
@@ -555,6 +567,12 @@ function App() {
                   <span className="image-count-text">
                     {t.imageCount(images.length)}
                   </span>
+                  {images.length > 1 && (
+                    <button className="btn" style={{ background: 'var(--border-color)', color: 'var(--text-main)', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={autoSortImages}>
+                      <ArrowDownAZ size={16} />
+                      {t.autoSort}
+                    </button>
+                  )}
                   <button className="btn btn-danger clear-btn" onClick={() => setShowClearConfirm(true)}>
                     <Trash2 size={16} />
                     {t.clearAll}
@@ -761,7 +779,10 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowPreviewModal(false)}>
           <div className="modal-content" style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{fileName || getSmartFilename()}.pdf</h3>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                {fileName || getSmartFilename()}.pdf
+                {pdfBlob && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>{t.fileSize} {(pdfBlob.size / (1024 * 1024)).toFixed(2)} MB</span>}
+              </h3>
               <button className="icon-button" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
             </div>
             <div style={{ flex: 1, backgroundColor: '#525659' }}>

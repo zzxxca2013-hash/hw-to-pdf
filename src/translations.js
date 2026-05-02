@@ -36,6 +36,8 @@ export const translations = {
     maxImagesError: "Sorry, the maximum limit is 100 images per PDF.",
     takePhoto: "Take Photo",
     offlineMode: "Offline Mode",
+    autoSort: "Sort A-Z",
+    fileSize: "Size:",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
     addMargins: "Page Margins",
@@ -95,6 +97,8 @@ export const translations = {
     maxImagesError: "عذراً، الحد الأقصى هو 100 صورة للملف الواحد.",
     takePhoto: "التقاط صورة",
     offlineMode: "يعمل بدون إنترنت",
+    autoSort: "ترتيب ذكي",
+    fileSize: "الحجم:",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";
       if (count === 2) return "صورتان";
