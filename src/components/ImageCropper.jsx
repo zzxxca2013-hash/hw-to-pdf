@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { centerCrop, makeAspectCrop, convertToPixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { X, Check } from 'lucide-react';
 
@@ -35,24 +35,31 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
       return;
     }
 
-    const canvas = document.createElement('canvas');
-    const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
-    const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
+    const image = imgRef.current;
     
-    canvas.width = crop.width * scaleX;
-    canvas.height = crop.height * scaleY;
+    // Convert percentage crop to pixel crop if needed
+    const pixelCrop = crop.unit === '%' 
+      ? convertToPixelCrop(crop, image.width, image.height)
+      : crop;
+
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    
+    canvas.width = pixelCrop.width * scaleX;
+    canvas.height = pixelCrop.height * scaleY;
     const ctx = canvas.getContext('2d');
 
     ctx.drawImage(
-      imgRef.current,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
+      image,
+      pixelCrop.x * scaleX,
+      pixelCrop.y * scaleY,
+      pixelCrop.width * scaleX,
+      pixelCrop.height * scaleY,
       0,
       0,
-      crop.width * scaleX,
-      crop.height * scaleY
+      pixelCrop.width * scaleX,
+      pixelCrop.height * scaleY
     );
 
     const base64Image = canvas.toDataURL('image/jpeg', 1.0);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
@@ -70,6 +70,10 @@ function App() {
       }));
       
       setImages(prev => [...prev, ...newImages]);
+      
+      if (acceptedFiles.length > 0) {
+        setFileName(prev => prev ? prev : acceptedFiles[0].name.replace(/\.[^/.]+$/, ""));
+      }
     } catch (err) {
       setError(t.errorProcessing);
     } finally {
@@ -83,8 +87,15 @@ function App() {
   });
 
   const removeImage = (id) => {
-    setImages(prev => prev.filter(img => img.id !== id));
-    setPdfUrl(null);
+    setImages(prev => {
+      const img = prev.find(i => i.id === id);
+      if (img) URL.revokeObjectURL(img.previewUrl);
+      return prev.filter(i => i.id !== id);
+    });
+    setPdfUrl(prev => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
   };
 
   const rotateImage = (id) => {
@@ -95,10 +106,16 @@ function App() {
   };
 
   const clearAll = () => {
-    setImages([]);
-    setError(null);
-    setPdfUrl(null);
-    setCroppingImageId(null);
+    if (window.confirm(t.clearAllConfirm || (lang === 'ar' ? 'هل أنت متأكد من مسح جميع الصور؟' : 'Are you sure you want to clear all images?'))) {
+      images.forEach(img => URL.revokeObjectURL(img.previewUrl));
+      setImages([]);
+      setError(null);
+      setPdfUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+      setCroppingImageId(null);
+    }
   };
 
   const handleCropComplete = async (base64Image) => {
@@ -107,13 +124,19 @@ function App() {
       const res = await fetch(base64Image);
       const blob = await res.blob();
       const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+      const newPreviewUrl = URL.createObjectURL(file);
       
-      setImages(prev => prev.map(img => 
-        img.id === croppingImageId 
-          ? { ...img, file, previewUrl: URL.createObjectURL(file), rotation: 0 } 
-          : img
-      ));
-      setPdfUrl(null);
+      setImages(prev => prev.map(img => {
+        if (img.id === croppingImageId) {
+          URL.revokeObjectURL(img.previewUrl); // Revoke old URL
+          return { ...img, file, previewUrl: newPreviewUrl, rotation: 0 };
+        }
+        return img;
+      }));
+      setPdfUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
       setCroppingImageId(null);
     } catch (err) {
       console.error('Error applying crop:', err);
@@ -123,7 +146,8 @@ function App() {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -229,7 +253,10 @@ function App() {
 
       const pdfBlob = pdf.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);
-      setPdfUrl(blobUrl);
+      setPdfUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return blobUrl;
+      });
     } catch (err) {
       console.error(err);
       setError(t.errorProcessing);
@@ -374,10 +401,15 @@ function App() {
               {t.convertToPdf}
             </button>
             {pdfUrl && (
-              <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
-                <Download size={22} />
-                {t.downloadPdf}
-              </a>
+              <>
+                <a href={pdfUrl} download={`${fileName || (lang === 'ar' ? 'واجب' : 'homework')}.pdf`} className="btn btn-success">
+                  <Download size={22} />
+                  {t.downloadPdf}
+                </a>
+                <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
+                  {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
+                </button>
+              </>
             )}
           </div>
           
