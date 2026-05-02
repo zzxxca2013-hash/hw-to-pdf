@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { X, RotateCw, Crop } from 'lucide-react';
 
-const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotation, enhanced }) => {
+const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotation, enhanced, scanner }) => {
   const {
     attributes,
     listeners,
@@ -21,7 +21,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`image-card ${enhanced ? 'enhanced' : ''}`} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className={`image-card ${enhanced ? 'enhanced' : ''} ${scanner ? 'scanner' : ''}`} {...attributes} {...listeners}>
       <div className="card-actions">
         <button 
           className="action-btn crop" 

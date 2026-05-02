@@ -9,23 +9,26 @@ import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import SortableImageItem from './components/SortableImageItem';
 import ImageCropper from './components/ImageCropper';
+import { useLocalStorage } from './hooks/useLocalStorage';
 import './index.css';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [lang, setLang] = useState('ar');
-  const [theme, setTheme] = useState('light');
-  const [enhance, setEnhance] = useState(false);
+  const [lang, setLang] = useLocalStorage('hw-pdf-lang', 'ar');
+  const [theme, setTheme] = useLocalStorage('hw-pdf-theme', 'light');
+  const [enhance, setEnhance] = useLocalStorage('hw-pdf-enhance', false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [processingText, setProcessingText] = useState('');
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfBlob, setPdfBlob] = useState(null);
-  const [addPageNumbers, setAddPageNumbers] = useState(false);
-  const [addMargins, setAddMargins] = useState(false);
-  const [quality, setQuality] = useState(0.9);
-  const [blackAndWhite, setBlackAndWhite] = useState(false);
+  const [addPageNumbers, setAddPageNumbers] = useLocalStorage('hw-pdf-page-num', false);
+  const [addMargins, setAddMargins] = useLocalStorage('hw-pdf-margins', false);
+  const [quality, setQuality] = useLocalStorage('hw-pdf-quality', 0.9);
+  const [blackAndWhite, setBlackAndWhite] = useLocalStorage('hw-pdf-bw', false);
+  const [scannerMode, setScannerMode] = useLocalStorage('hw-pdf-scanner', false);
   
   const getSmartFilename = () => {
     const d = new Date();
@@ -34,7 +37,7 @@ function App() {
   };
 
   const [fileName, setFileName] = useState(getSmartFilename());
-  const [watermark, setWatermark] = useState('');
+  const [watermark, setWatermark] = useLocalStorage('hw-pdf-watermark', '');
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -72,6 +75,17 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Toast auto-hide
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
 
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -192,7 +206,12 @@ function App() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const handleDragStart = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(40);
+  };
+
   const handleDragEnd = (event) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(40);
     const { active, over } = event;
     
     if (!over) return; // Prevent crash if dropped outside valid area
@@ -227,8 +246,12 @@ function App() {
         ctx.rotate((rotation * Math.PI) / 180);
         
         let filterStr = '';
-        if (enhance) filterStr += 'brightness(1.1) contrast(1.2) ';
-        if (blackAndWhite) filterStr += 'grayscale(100%) ';
+        if (scannerMode) {
+          filterStr += 'grayscale(100%) contrast(1.6) brightness(1.1) ';
+        } else {
+          if (enhance) filterStr += 'brightness(1.15) contrast(1.25) saturate(1.1) ';
+          if (blackAndWhite) filterStr += 'grayscale(100%) ';
+        }
         if (filterStr) ctx.filter = filterStr.trim();
         
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
@@ -264,6 +287,7 @@ function App() {
     setIsProcessing(true);
     setProgress(0);
     setError(null);
+    setSuccess(null);
     setPdfUrl(null);
     setPdfBlob(null);
 
@@ -322,6 +346,7 @@ function App() {
       const url = URL.createObjectURL(generatedBlob);
       setPdfUrl(url);
       setPdfBlob(generatedBlob);
+      setSuccess(t.pdfSuccess);
       
       confetti({
         particleCount: 150,
@@ -391,13 +416,11 @@ function App() {
 
       {activePage === 'home' ? (
         <>
-          {error && (
-            <div style={{ backgroundColor: 'rgba(230,57,70,0.1)', color: 'var(--error-color)', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1rem', border: '1px solid var(--error-color)' }}>
-              {error}
-            </div>
-          )}
+          <div className={`toast ${error ? 'show error' : success ? 'show success' : ''}`}>
+            {error || success}
+          </div>
 
-          <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''}`}>
+          <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''} ${images.length === 0 ? 'empty-state' : ''}`}>
             <input {...getInputProps()} />
             <ImagePlus className="dropzone-icon" />
             <p>{t.uploadPlaceholder}</p>
@@ -406,16 +429,23 @@ function App() {
 
           {images.length > 0 && (
             <>
-              <div className="toolbar glass-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', marginBottom: '1.5rem', borderRadius: '12px', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                  <div className="toggle-container" onClick={() => setEnhance(!enhance)}>
+              <div className="toolbar glass-panel">
+                <div className="toolbar-toggles">
+                  <div className="toggle-container" onClick={() => { setScannerMode(!scannerMode); if (!scannerMode) { setEnhance(false); setBlackAndWhite(false); } }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.scannerMode}</span>
+                    <div className={`toggle-switch ${scannerMode ? 'active' : ''}`}>
+                      <div className="toggle-knob"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="toggle-container" onClick={() => { setEnhance(!enhance); if (!enhance) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.enhanceToggle}</span>
                     <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
                   </div>
                   
-                  <div className="toggle-container" onClick={() => setBlackAndWhite(!blackAndWhite)}>
+                  <div className="toggle-container" onClick={() => { setBlackAndWhite(!blackAndWhite); if (!blackAndWhite) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.bwToggle}</span>
                     <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
@@ -423,18 +453,18 @@ function App() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '600' }}>
+                <div className="toolbar-actions">
+                  <span className="image-count-text">
                     {t.imageCount(images.length)}
                   </span>
-                  <button className="btn btn-danger" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={clearAll}>
+                  <button className="btn btn-danger clear-btn" onClick={clearAll}>
                     <Trash2 size={16} />
                     {t.clearAll}
                   </button>
                 </div>
               </div>
 
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <SortableContext items={images.map(i => i.id)} strategy={rectSortingStrategy}>
                   <div className="images-grid">
                     {images.map((img, index) => (
@@ -448,21 +478,18 @@ function App() {
                         onCrop={() => setCroppingImageId(img.id)}
                         rotation={img.rotation}
                         enhanced={enhance}
+                        scanner={scannerMode}
                       />
                     ))}
-                    <div 
-                      className="image-card" 
-                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '2px dashed var(--primary-color)', background: 'rgba(99, 102, 241, 0.05)' }} 
-                      onClick={open}
-                    >
-                      <Plus size={40} color="var(--primary-color)" style={{ marginBottom: '0.5rem' }} />
-                      <span style={{ color: 'var(--primary-color)', fontWeight: '600' }}>{t.addMoreImages}</span>
-                    </div>
+                      <div className="add-more-card" onClick={open}>
+                        <Plus size={40} className="add-more-icon" />
+                        <span>{t.addMoreImages}</span>
+                      </div>
                   </div>
                 </SortableContext>
               </DndContext>
 
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div className="action-buttons-container">
                 {!pdfUrl ? (
                   <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)} disabled={isProcessing}>
                     <FileDown size={22} />
