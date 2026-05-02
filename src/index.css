@@ -248,6 +248,12 @@ body::before {
   opacity: 1;
 }
 
+.dropzone.active {
+  transform: scale(1.02);
+  border-color: var(--primary-color);
+  background: rgba(99, 102, 241, 0.05);
+}
+
 .dropzone-icon {
   color: var(--primary-color);
   width: 64px;

@@ -45,6 +45,7 @@ function App() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [hasVisited, setHasVisited] = useLocalStorage('hw-pdf-visited', false);
   const iframeRef = useRef(null);
 
   const t = translations[lang];
@@ -116,6 +117,29 @@ function App() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Dynamic Tab Title
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.title = lang === 'ar' ? 'لا تنسَ تحويل واجبك! 📚' : 'Don\'t forget your homework! 📚';
+      } else {
+        document.title = t.title;
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [lang, t.title]);
+
+  // Welcome Toast for new users
+  useEffect(() => {
+    if (!hasVisited) {
+      setTimeout(() => {
+        setSuccess(lang === 'ar' ? 'مرحباً بك! ابدأ بإضافة صور واجبك هنا.' : 'Welcome! Start by adding your homework images here.');
+        setHasVisited(true);
+      }, 1000);
+    }
+  }, [hasVisited, lang, setHasVisited]);
 
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
