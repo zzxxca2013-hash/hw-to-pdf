@@ -36,7 +36,7 @@ export const translations = {
     seoText: "Homework to PDF is a free, fast, and secure tool designed for students to easily convert their homework images into a clean, professional PDF file. All image processing happens locally in your browser, ensuring your privacy is strictly protected. We do not store or upload your images to our servers.",
     privacyText: "Your privacy is our priority. All image processing (resizing, cropping, and PDF conversion) happens entirely within your web browser. We do not upload, store, or share your files with any third-party servers. We use Google AdSense to display ads, which may use cookies to serve personalized ads based on your visit.",
     termsText: "By using this tool, you agree to use it for lawful educational purposes. The tool is provided 'as is' without any warranties. We are not responsible for any lost data or errors in the generated PDF files.",
-    contactText: "For any inquiries or support, please contact us at support@hw-to-pdf.com (Replace with your real email later)."
+    contactText: "For any inquiries or support, please contact us at zzxxca2013@gmail.com"
   },
   ar: {
     title: "تحويل الواجبات إلى PDF",
@@ -80,6 +80,6 @@ export const translations = {
     seoText: "أداة تحويل الواجبات إلى PDF هي أداة مجانية وسريعة وآمنة صُممت خصيصاً للطلاب لتحويل صور الواجبات المدرسية إلى ملفات PDF احترافية بسهولة. تتم جميع عمليات معالجة الصور محلياً داخل متصفحك، مما يضمن حماية خصوصيتك بالكامل. نحن لا نقوم برفع أو تخزين صورك على أي خوادم خارجية.",
     privacyText: "خصوصيتك هي أولويتنا. جميع عمليات معالجة الصور (تغيير الحجم، القص، وتحويل PDF) تحدث بالكامل داخل متصفحك. نحن لا نقوم برفع أو تخزين أو مشاركة ملفاتك مع أي خوادم خارجية. نحن نستخدم Google AdSense لعرض الإعلانات، والتي قد تستخدم ملفات تعريف الارتباط (الكوكيز) لعرض إعلانات مخصصة.",
     termsText: "باستخدامك لهذه الأداة، فإنك توافق على استخدامها للأغراض التعليمية المشروعة. يتم تقديم الأداة 'كما هي' دون أي ضمانات. نحن غير مسؤولين عن أي فقدان للبيانات أو أخطاء في ملفات الـ PDF الناتجة.",
-    contactText: "لأي استفسارات أو طلبات دعم، يرجى التواصل معنا عبر البريد الإلكتروني: support@hw-to-pdf.com (قم بتغيير هذا الإيميل لاحقاً لإيميلك الحقيقي)."
+    contactText: "لأي استفسارات أو طلبات دعم، يرجى التواصل معنا عبر البريد الإلكتروني: zzxxca2013@gmail.com"
   }
 };
