@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2 } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
@@ -44,6 +44,7 @@ function App() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const iframeRef = useRef(null);
 
   const t = translations[lang];
 
@@ -349,13 +350,19 @@ function App() {
       setPdfBlob(generatedBlob);
       setSuccess(t.pdfSuccess);
       
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#6366f1', '#ec4899', '#10b981', '#f59e0b'],
-        zIndex: 3000
-      });
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 3000 };
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) { return clearInterval(interval); }
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+      
     } catch (err) {
       console.error(err);
       setError(t.errorProcessing);
@@ -383,6 +390,17 @@ function App() {
       }
     } else {
       alert(lang === 'ar' ? 'عذراً، متصفحك أو جهازك لا يدعم مشاركة الملفات المباشرة.' : 'Sorry, your browser does not support direct file sharing.');
+    }
+  };
+
+  const handlePrint = () => {
+    if (iframeRef.current) {
+      iframeRef.current.contentWindow.print();
+    } else if (pdfUrl) {
+      const printWindow = window.open(pdfUrl);
+      if (printWindow) {
+        printWindow.onload = () => printWindow.print();
+      }
     }
   };
 
@@ -662,11 +680,15 @@ function App() {
               <button className="icon-button" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
             </div>
             <div style={{ flex: 1, backgroundColor: '#525659' }}>
-              <iframe src={`${pdfUrl}#toolbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
+              <iframe ref={iframeRef} src={`${pdfUrl}#toolbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
             </div>
-            <div className="modal-actions" style={{ justifyContent: 'center' }}>
+            <div className="modal-actions" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowPreviewModal(false)}>
                 {t.closePreview}
+              </button>
+              <button className="btn" style={{ background: '#0ea5e9', color: 'white' }} onClick={handlePrint}>
+                <Printer size={20} />
+                {t.printPdf || 'Print PDF'}
               </button>
               <a href={pdfUrl} download={`${fileName || getSmartFilename()}.pdf`} className="btn btn-success">
                 <Download size={20} />

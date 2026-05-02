@@ -28,6 +28,7 @@ export const translations = {
     noCancel: "Cancel",
     closePreview: "Close Preview",
     previewTitle: "Image Preview",
+    printPdf: "Print PDF",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
     addMargins: "Page Margins",
@@ -79,6 +80,7 @@ export const translations = {
     noCancel: "تراجع",
     closePreview: "إغلاق المعاينة",
     previewTitle: "معاينة الصور",
+    printPdf: "طباعة الـ PDF",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";
       if (count === 2) return "صورتان";
