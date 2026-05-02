@@ -7,6 +7,7 @@ import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, D
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
+import { saveDraft, loadDraft, clearDraft } from './utils/db';
 import SortableImageItem from './components/SortableImageItem';
 import ImageCropper from './components/ImageCropper';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -140,6 +141,34 @@ function App() {
       }, 1000);
     }
   }, [hasVisited, lang, setHasVisited]);
+
+  // Draft Recovery
+  useEffect(() => {
+    let isMounted = true;
+    const recoverDraft = async () => {
+      const draftImages = await loadDraft();
+      if (draftImages && draftImages.length > 0 && isMounted) {
+        const recovered = draftImages.map(d => ({
+          id: d.id,
+          file: d.file,
+          previewUrl: URL.createObjectURL(d.file)
+        }));
+        setImages(recovered);
+        setSuccess(lang === 'ar' ? 'تم استعادة ملفاتك غير المحفوظة بنجاح!' : 'Unsaved files restored successfully!');
+      }
+    };
+    recoverDraft();
+    return () => { isMounted = false; };
+  }, [lang]);
+
+  // Save Draft
+  useEffect(() => {
+    if (images.length > 0) {
+      saveDraft(images);
+    } else {
+      clearDraft();
+    }
+  }, [images]);
 
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
