@@ -153,9 +153,7 @@ body::before {
   font-family: 'Outfit', 'Cairo', sans-serif;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--primary-color);
   letter-spacing: -0.02em;
 }
 
@@ -862,6 +860,10 @@ body::before {
   
   body {
     padding-bottom: 70px;
+  }
+
+  .hide-on-mobile {
+    display: none;
   }
 }
 
