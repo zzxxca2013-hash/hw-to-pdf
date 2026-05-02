@@ -22,6 +22,11 @@ export const translations = {
     errorProcessing: "An error occurred while creating the PDF.",
     pdfSuccess: "PDF created successfully!",
     clearAll: "Clear All",
+    clearAllConfirmTitle: "Clear All Images?",
+    clearAllConfirmDesc: "Are you sure you want to remove all uploaded images? This action cannot be undone.",
+    yesClear: "Yes, Clear",
+    noCancel: "Cancel",
+    closePreview: "Close Preview",
     previewTitle: "Image Preview",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
@@ -68,6 +73,11 @@ export const translations = {
     errorProcessing: "حدث خطأ أثناء إنشاء ملف PDF.",
     pdfSuccess: "تم إنشاء ملف PDF بنجاح!",
     clearAll: "مسح الكل",
+    clearAllConfirmTitle: "مسح جميع الصور؟",
+    clearAllConfirmDesc: "هل أنت متأكد من مسح جميع الصور المرفوعة؟ لا يمكن التراجع عن هذا الإجراء.",
+    yesClear: "نعم، مسح",
+    noCancel: "تراجع",
+    closePreview: "إغلاق المعاينة",
     previewTitle: "معاينة الصور",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";

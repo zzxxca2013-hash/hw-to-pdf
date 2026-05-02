@@ -41,6 +41,8 @@ function App() {
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const t = translations[lang];
@@ -161,17 +163,16 @@ function App() {
     setPdfUrl(null);
   };
 
-  const clearAll = () => {
-    if (window.confirm(t.clearAllConfirm || (lang === 'ar' ? 'هل أنت متأكد من مسح جميع الصور؟' : 'Are you sure you want to clear all images?'))) {
-      images.forEach(img => URL.revokeObjectURL(img.previewUrl));
-      setImages([]);
-      setError(null);
-      setPdfUrl(prev => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setCroppingImageId(null);
-    }
+  const confirmClearAll = () => {
+    images.forEach(img => URL.revokeObjectURL(img.previewUrl));
+    setImages([]);
+    setError(null);
+    setPdfUrl(prev => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setCroppingImageId(null);
+    setShowClearConfirm(false);
   };
 
   const handleCropComplete = async (base64Image) => {
@@ -457,7 +458,7 @@ function App() {
                   <span className="image-count-text">
                     {t.imageCount(images.length)}
                   </span>
-                  <button className="btn btn-danger clear-btn" onClick={clearAll}>
+                  <button className="btn btn-danger clear-btn" onClick={() => setShowClearConfirm(true)}>
                     <Trash2 size={16} />
                     {t.clearAll}
                   </button>
@@ -509,7 +510,7 @@ function App() {
                       </button>
                     )}
 
-                    <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => window.open(pdfUrl, '_blank')}>
+                    <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => setShowPreviewModal(true)}>
                       {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
                     </button>
                     <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)}>
@@ -625,6 +626,52 @@ function App() {
                 <FileDown size={20} />
                 {t.convertToPdf}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showClearConfirm && (
+        <div className="modal-overlay" onClick={() => setShowClearConfirm(false)}>
+          <div className="modal-content" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ color: 'var(--error-color)' }}>{t.clearAllConfirmTitle}</h3>
+              <button className="icon-button" onClick={() => setShowClearConfirm(false)}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>{t.clearAllConfirmDesc}</p>
+            </div>
+            <div className="modal-actions">
+              <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowClearConfirm(false)}>
+                {t.noCancel}
+              </button>
+              <button className="btn btn-danger" onClick={confirmClearAll}>
+                <Trash2 size={20} />
+                {t.yesClear}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPreviewModal && pdfUrl && (
+        <div className="modal-overlay" onClick={() => setShowPreviewModal(false)}>
+          <div className="modal-content" style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{fileName || getSmartFilename()}.pdf</h3>
+              <button className="icon-button" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
+            </div>
+            <div style={{ flex: 1, backgroundColor: '#525659' }}>
+              <iframe src={`${pdfUrl}#toolbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
+            </div>
+            <div className="modal-actions" style={{ justifyContent: 'center' }}>
+              <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowPreviewModal(false)}>
+                {t.closePreview}
+              </button>
+              <a href={pdfUrl} download={`${fileName || getSmartFilename()}.pdf`} className="btn btn-success">
+                <Download size={20} />
+                {t.downloadPdf}
+              </a>
             </div>
           </div>
         </div>
