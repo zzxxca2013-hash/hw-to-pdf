@@ -38,6 +38,7 @@ export const translations = {
     offlineMode: "Offline Mode",
     autoSort: "Sort A-Z",
     fileSize: "Size:",
+    addMore: "Add More",
     imageCount: (count) => `${count} image${count !== 1 ? 's' : ''}`,
     addPageNumbers: "Page Numbers",
     addMargins: "Page Margins",
@@ -99,6 +100,7 @@ export const translations = {
     offlineMode: "يعمل بدون إنترنت",
     autoSort: "ترتيب ذكي",
     fileSize: "الحجم:",
+    addMore: "إضافة صور",
     imageCount: (count) => {
       if (count === 1) return "صورة واحدة";
       if (count === 2) return "صورتان";

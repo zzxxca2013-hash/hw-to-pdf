@@ -616,19 +616,29 @@ function App() {
                   </div>
                 </div>
 
-                <div className="toolbar-actions">
-                  <span className="image-count-text">
+                <div className="toolbar-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span className="image-count-text hide-on-mobile">
                     {t.imageCount(images.length)}
                   </span>
+                  
+                  <button className="btn" style={{ background: 'var(--primary-color)', color: 'white', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={open}>
+                    <ImagePlus size={16} />
+                    {t.addMore}
+                  </button>
+
+                  <button className="icon-button" style={{ width: '32px', height: '32px', padding: 0 }} onClick={() => document.getElementById('cameraInput').click()}>
+                    <Camera size={16} />
+                  </button>
+
                   {images.length > 1 && (
                     <button className="btn" style={{ background: 'var(--border-color)', color: 'var(--text-main)', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={autoSortImages}>
                       <ArrowDownAZ size={16} />
-                      {t.autoSort}
+                      <span className="hide-on-mobile">{t.autoSort}</span>
                     </button>
                   )}
                   <button className="btn btn-danger clear-btn" onClick={() => setShowClearConfirm(true)}>
                     <Trash2 size={16} />
-                    {t.clearAll}
+                    <span className="hide-on-mobile">{t.clearAll}</span>
                   </button>
                 </div>
               </div>
