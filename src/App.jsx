@@ -3,13 +3,15 @@ import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
 import SortableImageItem from './components/SortableImageItem';
 import ImageCropper from './components/ImageCropper';
+import MergePdf from './components/MergePdf';
+import SplitPdf from './components/SplitPdf';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import './index.css';
 
@@ -39,6 +41,7 @@ function App() {
 
   const [fileName, setFileName] = useState(getSmartFilename());
   const [watermark, setWatermark] = useLocalStorage('hw-pdf-watermark', '');
+  const [activeTool, setActiveTool] = useState('img2pdf');
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -571,6 +574,22 @@ function App() {
             {error || success}
           </div>
 
+          <div className="tool-nav glass-panel" style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', marginBottom: '2rem', overflowX: 'auto', borderRadius: 'var(--radius)', whiteSpace: 'nowrap' }}>
+            <button className={`btn ${activeTool === 'img2pdf' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('img2pdf')}>
+              <ImagePlus size={18} /> {lang === 'ar' ? 'صور إلى PDF' : 'Image to PDF'}
+            </button>
+            <button className={`btn ${activeTool === 'merge' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('merge')}>
+              <Layers size={18} /> {lang === 'ar' ? 'دمج PDF' : 'Merge PDF'}
+            </button>
+            <button className={`btn ${activeTool === 'split' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('split')}>
+              <Scissors size={18} /> {lang === 'ar' ? 'فصل PDF' : 'Split PDF'}
+            </button>
+          </div>
+
+          {activeTool === 'img2pdf' && (
+            <>
+
+
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexDirection: 'column' }}>
             <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''} ${images.length === 0 ? 'empty-state' : ''}`} style={{ marginBottom: 0 }}>
               <input {...getInputProps()} />
@@ -717,6 +736,11 @@ function App() {
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>{t.seoTitle}</h2>
             <p style={{ color: 'var(--text-muted)', lineHeight: '1.8' }}>{t.seoText}</p>
           </div>
+          </>
+          )}
+
+          {activeTool === 'merge' && <MergePdf setError={setError} />}
+          {activeTool === 'split' && <SplitPdf setError={setError} />}
         </>
       ) : (
         <div className="page-content glass-panel" style={{ padding: '2.5rem', textAlign: 'start', minHeight: '50vh' }}>
