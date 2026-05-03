@@ -738,6 +738,15 @@ function App() {
         {/* Insert AdSense Script Here */}
       </div>
 
+      {/* SEO Hidden Keywords */}
+      <div style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', border: 0 }}>
+        <h2>Image to PDF</h2>
+        <h2>JPG to PDF</h2>
+        <h2>PNG to PDF</h2>
+        <h2>تحويل الصور إلى PDF</h2>
+        <h2>دمج الصور في ملف PDF</h2>
+      </div>
+
       {isProcessing && (
         <div className="loading-overlay">
           <div className="spinner"></div>
