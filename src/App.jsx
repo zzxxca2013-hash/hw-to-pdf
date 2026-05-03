@@ -738,13 +738,47 @@ function App() {
         {/* Insert AdSense Script Here */}
       </div>
 
-      {/* SEO Hidden Keywords */}
-      <div style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', border: 0 }}>
-        <h2>Image to PDF</h2>
-        <h2>JPG to PDF</h2>
-        <h2>PNG to PDF</h2>
-        <h2>تحويل الصور إلى PDF</h2>
-        <h2>دمج الصور في ملف PDF</h2>
+      {/* SEO Article Section - Visually styled to match premium UI */}
+      <div className="seo-article glass-panel" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'left', direction: 'ltr', color: 'var(--text-secondary)' }}>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>Free Image to PDF Converter Online</h1>
+        <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
+          Convert images to PDF online for free. This tool allows you to quickly turn JPG, PNG, and other image formats into a clean and organized PDF file without installing any software.
+        </p>
+        <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+          This Image to PDF converter is perfect for students who need to submit homework, documents, or notes in PDF format. Simply upload your images, arrange them in the correct order, and download your PDF in seconds.
+        </p>
+
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>How to convert images to PDF:</h2>
+        <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: '1.6' }}>
+          <li>Upload your images (JPG, PNG)</li>
+          <li>Arrange them in order</li>
+          <li>Click convert to PDF</li>
+          <li>Download your file instantly</li>
+        </ul>
+
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>Features:</h2>
+        <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: '1.6' }}>
+          <li>Free and easy to use</li>
+          <li>No installation required</li>
+          <li>Fast conversion</li>
+          <li>Supports multiple image formats</li>
+          <li>Works on mobile and desktop</li>
+        </ul>
+
+        <div style={{ direction: 'rtl', textAlign: 'right', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
+          <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>تحويل الصور إلى PDF بسهولة</h2>
+          <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
+            يمكنك تحويل الصور إلى PDF مجانًا وبسرعة بدون الحاجة إلى تثبيت أي برنامج. هذه الأداة تساعدك على تحويل صور JPG و PNG إلى ملف PDF مرتب.
+          </p>
+          <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
+            مناسبة للطلاب لتحويل الواجبات أو الملاحظات إلى PDF بسهولة. فقط قم برفع الصور، ترتيبها، ثم تحميل الملف.
+          </p>
+        </div>
+
+        <h2 style={{ fontSize: '1rem', marginTop: '2rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Keywords:</h2>
+        <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+          Image to PDF, JPG to PDF, PNG to PDF, convert images to PDF, free PDF converter, online PDF tool, homework to PDF
+        </p>
       </div>
 
       {isProcessing && (
