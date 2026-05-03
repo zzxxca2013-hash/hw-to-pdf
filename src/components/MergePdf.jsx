@@ -2,12 +2,12 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
 import { UploadCloud, FileText, Trash2, ArrowDownAZ, Settings, Check, X } from 'lucide-react';
-import { useTranslations } from '../translations';
+import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export default function MergePdf({ setError }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = useTranslations(lang);
+  const t = translations[lang] || translations.en;
   const [pdfs, setPdfs] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);

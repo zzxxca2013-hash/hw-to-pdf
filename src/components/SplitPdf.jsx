@@ -3,12 +3,12 @@ import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
-import { useTranslations } from '../translations';
+import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export default function SplitPdf({ setError }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = useTranslations(lang);
+  const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
