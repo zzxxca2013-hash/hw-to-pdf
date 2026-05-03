@@ -535,7 +535,7 @@ function App() {
         <div className="bg-blob-2"></div>
       </div>
       <div className="container">
-        <header className="header glass-panel">
+        <header className="header">
         <div className="header-content">
           <h1>{t.title}</h1>
           <p>{t.subtitle}</p>
@@ -554,10 +554,10 @@ function App() {
             </div>
           )}
           <button className="icon-button" onClick={toggleLang} aria-label={t.toggleLang} title={t.toggleLang}>
-            <Languages size={24} />
+            <Languages size={20} />
           </button>
           <button className="icon-button" onClick={toggleTheme} aria-label={t.toggleTheme} title={t.toggleTheme}>
-            {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
         </div>
       </header>
