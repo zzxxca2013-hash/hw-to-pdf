@@ -44,7 +44,31 @@ export default defineConfig({
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: "Image to PDF",
+            short_name: "Img to PDF",
+            description: "Convert images to PDF",
+            url: "/hw-to-pdf/",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "Merge PDF",
+            short_name: "Merge",
+            description: "Merge multiple PDFs",
+            url: "/hw-to-pdf/merge/",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "Compress PDF",
+            short_name: "Compress",
+            description: "Reduce PDF size",
+            url: "/hw-to-pdf/compress/",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }]
           }
         ]
       }
