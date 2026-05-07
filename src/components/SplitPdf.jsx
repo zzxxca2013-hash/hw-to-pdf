@@ -36,6 +36,12 @@ export default function SplitPdf({ setError }) {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const pdf = await PDFDocument.load(arrayBuffer);
       const pageCount = pdf.getPageCount();
+
+      if (pageCount > 150) {
+        setError(lang === 'ar' ? 'عذراً، لا يمكن فصل ملف يحتوي على أكثر من 150 صفحة لحماية متصفحك.' : 'Sorry, maximum limit is 150 pages to prevent browser crash.');
+        setIsProcessing(false);
+        return;
+      }
       
       const zip = new JSZip();
       

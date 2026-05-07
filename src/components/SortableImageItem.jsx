@@ -25,33 +25,30 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
       <div className="card-actions">
         <button 
           className="action-btn crop" 
-          onClick={(e) => {
-            e.stopPropagation();
-            onCrop();
-          }}
+          onClick={(e) => { e.stopPropagation(); onCrop(); }}
           onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           title="Crop"
         >
           <Crop size={18} />
         </button>
         <button 
           className="action-btn rotate" 
-          onClick={(e) => {
-            e.stopPropagation();
-            onRotate();
-          }}
+          onClick={(e) => { e.stopPropagation(); onRotate(); }}
           onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           title="Rotate"
         >
           <RotateCw size={18} />
         </button>
         <button 
           className="action-btn delete" 
-          onClick={(e) => {
-            e.stopPropagation(); // prevent drag start
-            onRemove();
-          }}
-          onPointerDown={(e) => e.stopPropagation()} // prevent drag start on click for touch devices
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           title="Delete"
         >
           <X size={18} />

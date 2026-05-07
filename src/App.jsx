@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
-import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors } from 'lucide-react';
+import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
 import SortableImageItem from './components/SortableImageItem';
-import ImageCropper from './components/ImageCropper';
-import MergePdf from './components/MergePdf';
-import SplitPdf from './components/SplitPdf';
+const ImageCropper = lazy(() => import('./components/ImageCropper'));
+const MergePdf = lazy(() => import('./components/MergePdf'));
+const SplitPdf = lazy(() => import('./components/SplitPdf'));
+const PdfToImg = lazy(() => import('./components/PdfToImg'));
+const OrganizePdf = lazy(() => import('./components/OrganizePdf'));
+const CompressPdf = lazy(() => import('./components/CompressPdf'));
 import { useLocalStorage } from './hooks/useLocalStorage';
 import './index.css';
 
@@ -41,7 +44,29 @@ function App() {
 
   const [fileName, setFileName] = useState(getSmartFilename());
   const [watermark, setWatermark] = useLocalStorage('hw-pdf-watermark', '');
-  const [activeTool, setActiveTool] = useState('img2pdf');
+  const getInitialTool = () => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path.includes('/merge')) return 'merge';
+      if (path.includes('/split')) return 'split';
+      if (path.includes('/pdf2img')) return 'pdf2img';
+      if (path.includes('/organize')) return 'organize';
+      if (path.includes('/compress')) return 'compress';
+    }
+    return 'img2pdf';
+  };
+  const [activeTool, setActiveTool] = useState(getInitialTool());
+
+  const handleToolChange = (tool) => {
+    setActiveTool(tool);
+    let path = '/hw-to-pdf/';
+    if (tool === 'merge') path = '/hw-to-pdf/merge/';
+    if (tool === 'split') path = '/hw-to-pdf/split/';
+    if (tool === 'pdf2img') path = '/hw-to-pdf/pdf2img/';
+    if (tool === 'organize') path = '/hw-to-pdf/organize/';
+    if (tool === 'compress') path = '/hw-to-pdf/compress/';
+    window.history.pushState({}, '', path);
+  };
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -83,6 +108,10 @@ function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#0f172a' : '#ffffff');
+    }
   }, [theme]);
 
   // Global Keyboard Shortcuts
@@ -122,18 +151,30 @@ function App() {
     };
   }, []);
 
+  // Browser Back/Forward Button Support
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTool(getInitialTool());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Dynamic Tab Title
   useEffect(() => {
+    const currentTitle = activeTool === 'img2pdf' ? t.title : activeTool === 'merge' ? t.mergeTitle : activeTool === 'split' ? t.splitTitle : activeTool === 'pdf2img' ? t.pdf2imgTitle : activeTool === 'compress' ? t.compressTitle : t.organizeTitle;
+    document.title = currentTitle;
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         document.title = lang === 'ar' ? 'لا تنسَ تحويل واجبك! 📚' : 'Don\'t forget your homework! 📚';
       } else {
-        document.title = t.title;
+        document.title = currentTitle;
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lang, t.title]);
+  }, [lang, t, activeTool]);
 
   // Welcome Toast for new users
   useEffect(() => {
@@ -534,11 +575,11 @@ function App() {
         <div className="bg-blob-1"></div>
         <div className="bg-blob-2"></div>
       </div>
-      <div className="container">
+      <main className="container">
         <header className="header">
         <div className="header-content">
-          <h1>{t.title}</h1>
-          <p>{t.subtitle}</p>
+          <h1>{activeTool === 'img2pdf' ? t.title : activeTool === 'merge' ? t.mergeTitle : activeTool === 'split' ? t.splitTitle : activeTool === 'pdf2img' ? t.pdf2imgTitle : activeTool === 'compress' ? t.compressTitle : t.organizeTitle}</h1>
+          <p>{activeTool === 'img2pdf' ? t.subtitle : activeTool === 'merge' ? t.mergeSubtitle : activeTool === 'split' ? t.splitSubtitle : activeTool === 'pdf2img' ? t.pdf2imgSubtitle : activeTool === 'compress' ? t.compressSubtitle : t.organizeSubtitle}</p>
         </div>
         <div className="controls">
           {deferredPrompt && (
@@ -562,11 +603,7 @@ function App() {
         </div>
       </header>
 
-      {/* Ad Banner - Top */}
-      <div className="ad-banner glass-panel">
-        <span>Advertisement Space (Top)</span>
-        {/* Insert AdSense Script Here */}
-      </div>
+
 
       {activePage === 'home' ? (
         <>
@@ -575,15 +612,24 @@ function App() {
           </div>
 
           <div className="tool-nav glass-panel" style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', marginBottom: '2rem', overflowX: 'auto', borderRadius: 'var(--radius)', whiteSpace: 'nowrap' }}>
-            <button className={`btn ${activeTool === 'img2pdf' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('img2pdf')}>
+            <a href="/hw-to-pdf/" className={`btn ${activeTool === 'img2pdf' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('img2pdf'); }}>
               <ImagePlus size={18} /> {lang === 'ar' ? 'صور إلى PDF' : 'Image to PDF'}
-            </button>
-            <button className={`btn ${activeTool === 'merge' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('merge')}>
+            </a>
+            <a href="/hw-to-pdf/merge/" className={`btn ${activeTool === 'merge' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('merge'); }}>
               <Layers size={18} /> {lang === 'ar' ? 'دمج PDF' : 'Merge PDF'}
-            </button>
-            <button className={`btn ${activeTool === 'split' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content' }} onClick={() => setActiveTool('split')}>
+            </a>
+            <a href="/hw-to-pdf/split/" className={`btn ${activeTool === 'split' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('split'); }}>
               <Scissors size={18} /> {lang === 'ar' ? 'فصل PDF' : 'Split PDF'}
-            </button>
+            </a>
+            <a href="/hw-to-pdf/pdf2img/" className={`btn ${activeTool === 'pdf2img' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('pdf2img'); }}>
+              <FileImage size={18} /> {lang === 'ar' ? 'PDF لصور' : 'PDF to JPG'}
+            </a>
+            <a href="/hw-to-pdf/organize/" className={`btn ${activeTool === 'organize' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('organize'); }}>
+              <ListOrdered size={18} /> {lang === 'ar' ? 'ترتيب PDF' : 'Organize'}
+            </a>
+            <a href="/hw-to-pdf/compress/" className={`btn ${activeTool === 'compress' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('compress'); }}>
+              <Minimize2 size={18} /> {lang === 'ar' ? 'ضغط PDF' : 'Compress'}
+            </a>
           </div>
 
           {activeTool === 'img2pdf' && (
@@ -730,17 +776,69 @@ function App() {
               <p>{t.noImages}</p>
             </div>
           )}
-
-          {/* SEO Text Section for AdSense */}
-          <div className="seo-section glass-panel" style={{ marginTop: '3rem', padding: '2rem', textAlign: 'start' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>{t.seoTitle}</h2>
-            <p style={{ color: 'var(--text-muted)', lineHeight: '1.8' }}>{t.seoText}</p>
-          </div>
-          </>
+            </>
           )}
 
-          {activeTool === 'merge' && <MergePdf setError={setError} />}
-          {activeTool === 'split' && <SplitPdf setError={setError} />}
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}><div className="spinner"></div></div>}>
+            {activeTool === 'merge' && <MergePdf setError={setError} />}
+            {activeTool === 'split' && <SplitPdf setError={setError} />}
+            {activeTool === 'pdf2img' && <PdfToImg setError={setError} />}
+            {activeTool === 'organize' && <OrganizePdf setError={setError} />}
+            {activeTool === 'compress' && <CompressPdf setError={setError} />}
+          </Suspense>
+
+          {/* Dynamic SEO Variables based on active tool */}
+          {(() => {
+            const currentSeoTitle = activeTool === 'img2pdf' ? t.seoTitle : activeTool === 'merge' ? t.mergeSeoTitle : activeTool === 'split' ? t.splitSeoTitle : activeTool === 'pdf2img' ? t.pdf2imgSeoTitle : activeTool === 'compress' ? t.compressSeoTitle : t.organizeSeoTitle;
+            const currentSeoText = activeTool === 'img2pdf' ? t.seoText : activeTool === 'merge' ? t.mergeSeoText : activeTool === 'split' ? t.splitSeoText : activeTool === 'pdf2img' ? t.pdf2imgSeoText : activeTool === 'compress' ? t.compressSeoText : t.organizeSeoText;
+            const currentFaqTitle = t.faqTitle;
+            const currentFaq = activeTool === 'img2pdf' ? t.faq : activeTool === 'merge' ? t.mergeFaq : activeTool === 'split' ? t.splitFaq : activeTool === 'pdf2img' ? t.pdf2imgFaq : activeTool === 'compress' ? t.compressFaq : t.organizeFaq;
+
+            return (
+              <>
+                {/* SEO Text Section */}
+                {currentSeoTitle && currentSeoText && (
+                  <div className="seo-section glass-panel" style={{ marginTop: '3rem', padding: '2rem', textAlign: 'start' }}>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>{currentSeoTitle}</h2>
+                    <p style={{ color: 'var(--text-muted)', lineHeight: '1.8' }}>{currentSeoText}</p>
+                  </div>
+                )}
+
+                {/* FAQ Section */}
+                {currentFaq && (
+                  <div className="faq-section glass-panel" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'start' }}>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>{currentFaqTitle}</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {currentFaq.map((item, idx) => (
+                        <div key={idx} className="faq-item" style={{ borderBottom: idx !== currentFaq.length - 1 ? '1px solid var(--border-color)' : 'none', paddingBottom: idx !== currentFaq.length - 1 ? '1.5rem' : '0' }}>
+                          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>{item.q}</h3>
+                          <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontSize: '0.95rem' }}>{item.a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Inject Dynamic FAQ Schema for Google */}
+                {currentFaq && (
+                  <script type="application/ld+json" dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "FAQPage",
+                      "mainEntity": currentFaq.map(item => ({
+                        "@type": "Question",
+                        "name": item.q,
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": item.a
+                        }
+                      }))
+                    })
+                  }} />
+                )}
+              </>
+            );
+          })()}
         </>
       ) : (
         <div className="page-content glass-panel" style={{ padding: '2.5rem', textAlign: 'start', minHeight: '50vh' }}>
@@ -753,57 +851,18 @@ function App() {
           <p style={{ color: 'var(--text-main)', lineHeight: '2', fontSize: '1.1rem' }}>
             {activePage === 'privacy' ? t.privacyText : activePage === 'terms' ? t.termsText : t.contactText}
           </p>
+          {activePage === 'contact' && t.contactEmail && (
+            <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center' }}>
+              <a href={`mailto:${t.contactEmail}`} className="btn" style={{ background: 'var(--primary-color)', color: 'white', display: 'inline-flex', alignItems: 'center', gap: '0.8rem', fontSize: '1.2rem', padding: '1rem 2rem', borderRadius: '12px', textDecoration: 'none', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                {t.contactEmail}
+              </a>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Ad Banner - Bottom */}
-      <div className="ad-banner glass-panel" style={{ marginTop: '3rem' }}>
-        <span>Advertisement Space (Bottom)</span>
-        {/* Insert AdSense Script Here */}
-      </div>
 
-      {/* SEO Article Section - Visually styled to match premium UI */}
-      <div className="seo-article glass-panel" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'left', direction: 'ltr', color: 'var(--text-secondary)' }}>
-        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>Free Image to PDF Converter Online</h1>
-        <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
-          Convert images to PDF online for free. This tool allows you to quickly turn JPG, PNG, and other image formats into a clean and organized PDF file without installing any software.
-        </p>
-        <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
-          This Image to PDF converter is perfect for students who need to submit homework, documents, or notes in PDF format. Simply upload your images, arrange them in the correct order, and download your PDF in seconds.
-        </p>
-
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>How to convert images to PDF:</h2>
-        <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: '1.6' }}>
-          <li>Upload your images (JPG, PNG)</li>
-          <li>Arrange them in order</li>
-          <li>Click convert to PDF</li>
-          <li>Download your file instantly</li>
-        </ul>
-
-        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>Features:</h2>
-        <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: '1.6' }}>
-          <li>Free and easy to use</li>
-          <li>No installation required</li>
-          <li>Fast conversion</li>
-          <li>Supports multiple image formats</li>
-          <li>Works on mobile and desktop</li>
-        </ul>
-
-        <div style={{ direction: 'rtl', textAlign: 'right', marginTop: '2rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'var(--text-main)' }}>تحويل الصور إلى PDF بسهولة</h2>
-          <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
-            يمكنك تحويل الصور إلى PDF مجانًا وبسرعة بدون الحاجة إلى تثبيت أي برنامج. هذه الأداة تساعدك على تحويل صور JPG و PNG إلى ملف PDF مرتب.
-          </p>
-          <p style={{ marginBottom: '1.5rem', lineHeight: '1.6' }}>
-            مناسبة للطلاب لتحويل الواجبات أو الملاحظات إلى PDF بسهولة. فقط قم برفع الصور، ترتيبها، ثم تحميل الملف.
-          </p>
-        </div>
-
-        <h2 style={{ fontSize: '1rem', marginTop: '2rem', marginBottom: '0.5rem', color: 'var(--text-main)' }}>Keywords:</h2>
-        <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-          Image to PDF, JPG to PDF, PNG to PDF, convert images to PDF, free PDF converter, online PDF tool, homework to PDF
-        </p>
-      </div>
 
       {isProcessing && (
         <div className="loading-overlay">
@@ -821,12 +880,14 @@ function App() {
       )}
 
       {croppingImageId && (
-        <ImageCropper 
-          imageUrl={images.find(img => img.id === croppingImageId)?.previewUrl}
-          onCropComplete={handleCropComplete}
-          onCancel={() => setCroppingImageId(null)}
-          t={t}
-        />
+        <Suspense fallback={null}>
+          <ImageCropper 
+            imageUrl={images.find(img => img.id === croppingImageId)?.previewUrl}
+            onCropComplete={handleCropComplete}
+            onCancel={() => setCroppingImageId(null)}
+            t={t}
+          />
+        </Suspense>
       )}
 
       {showSettingsModal && (
@@ -946,11 +1007,8 @@ function App() {
         <p>© {new Date().getFullYear()} {t.title}. All rights reserved.</p>
       </footer>
 
-      {/* Mobile AdSense Anchor Placeholder */}
-      <div className="mobile-ad-anchor">
-        {lang === 'ar' ? 'مساحة إعلان AdSense' : 'AdSense Banner Space'}
-      </div>
-    </div>
+
+    </main>
     </>
   );
 }

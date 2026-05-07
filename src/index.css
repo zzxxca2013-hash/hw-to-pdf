@@ -861,38 +861,13 @@ body::before {
   }
   
   .toast {
-    bottom: 80px; /* Above the mobile ad */
+    top: auto;
+    bottom: 1.5rem;
     width: calc(100% - 2rem);
     max-width: 400px;
-  }
-
-  .mobile-ad-anchor {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: var(--card-bg);
-    backdrop-filter: var(--glass-blur);
-    border-top: 1px solid var(--border-color);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-  }
-  
-  body {
-    padding-bottom: 70px;
   }
 
   .hide-on-mobile {
     display: none;
   }
-}
-
-.mobile-ad-anchor {
-  display: none;
 }
