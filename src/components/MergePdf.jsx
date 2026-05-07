@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
-import { UploadCloud, FileText, Trash2, ArrowDownAZ, Settings, Check, X } from 'lucide-react';
+import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -23,13 +23,13 @@ export default function MergePdf({ setError }) {
         name: file.name
       }));
       setPdfs(prev => [...prev, ...newPdfs]);
-    } catch (err) {
+    } catch {
       setError(t.errorProcessing || "Error adding files");
     } finally {
       setIsProcessing(false);
       setProgress(0);
     }
-  }, []);
+  }, [setError, t.errorProcessing]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
-import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
@@ -101,9 +101,6 @@ function App() {
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-    if (!fileName || fileName.startsWith('واجب_') || fileName.startsWith('Homework_')) {
-      setFileName(getSmartFilename());
-    }
   }, [lang]);
 
   useEffect(() => {
@@ -257,12 +254,12 @@ function App() {
       if (acceptedFiles.length > 0) {
         setFileName(prev => prev ? prev : acceptedFiles[0].name.replace(/\.[^/.]+$/, ""));
       }
-    } catch (err) {
+    } catch {
       setError(t.errorProcessing);
     } finally {
       setIsProcessing(false);
     }
-  }, [images]);
+  }, [images, t.maxImagesError, t.errorProcessing, setError]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
