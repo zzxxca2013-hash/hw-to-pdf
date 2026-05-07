@@ -20,7 +20,11 @@ import './index.css';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [lang, setLang] = useLocalStorage('hw-pdf-lang', 'ar');
+  const getDefaultLang = () => {
+    if (typeof window === 'undefined') return 'ar';
+    return window.navigator.language.startsWith('ar') ? 'ar' : 'en';
+  };
+  const [lang, setLang] = useLocalStorage('hw-pdf-lang', getDefaultLang());
   const [theme, setTheme] = useLocalStorage('hw-pdf-theme', 'light');
   const [enhance, setEnhance] = useLocalStorage('hw-pdf-enhance', false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -211,7 +215,11 @@ function App() {
     }
   }, [images]);
 
-  const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
+  const toggleLang = () => {
+    const newLang = lang === 'en' ? 'ar' : 'en';
+    setLang(newLang);
+    setTimeout(() => window.location.reload(), 50);
+  };
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const onDrop = useCallback(async (acceptedFiles) => {
