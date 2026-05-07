@@ -10,6 +10,7 @@ const __dirname = dirname(__filename)
 export default defineConfig({
   base: '/hw-to-pdf/',
   build: {
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
@@ -31,6 +32,9 @@ export default defineConfig({
         short_name: 'HW to PDF',
         description: 'Quickly convert your homework images to a clean PDF',
         theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'any',
         icons: [
           {
             src: 'pwa-192x192.png',
