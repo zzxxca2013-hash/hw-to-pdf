@@ -1,13 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
-import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
+import { UploadCloud, FileText, Trash2, Check, ArrowDown, ArrowUp } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import SeoContent from './SeoContent';
 
-export default function MergePdf({ setError }) {
-  const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = translations[lang] || translations.en;
+export default function MergePdf({ setError, t, lang }) {
   const [pdfs, setPdfs] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -17,6 +16,14 @@ export default function MergePdf({ setError }) {
     setIsProcessing(true);
     setProgress(20);
     try {
+      for (const file of acceptedFiles) {
+        if (file.size > 50 * 1024 * 1024) {
+          setError(lang === 'ar' ? 'عذراً، حجم الملف يتجاوز الحد الأقصى (50 ميجابايت)' : 'Sorry, file size exceeds maximum limit (50 MB)');
+          setIsProcessing(false);
+          setProgress(0);
+          return;
+        }
+      }
       const newPdfs = acceptedFiles.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
         file,
@@ -59,6 +66,7 @@ export default function MergePdf({ setError }) {
         const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
         copiedPages.forEach((page) => mergedPdf.addPage(page));
         setProgress(10 + Math.round(((i + 1) / pdfs.length) * 60));
+        await new Promise(r => setTimeout(r, 10)); // Yield to main thread
       }
 
       setProgress(80);
@@ -67,6 +75,10 @@ export default function MergePdf({ setError }) {
       const url = URL.createObjectURL(blob);
       setResultUrl(url);
       setProgress(100);
+
+      if (window.gtag) {
+        window.gtag('event', 'merge_success', { files_count: pdfs.length });
+      }
       
       const toast = document.getElementById('success-toast');
       if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
@@ -82,11 +94,11 @@ export default function MergePdf({ setError }) {
   return (
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'دمج ملفات PDF' : 'Merge PDF Files'}
-        </h2>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
+          {t.mergeTitle}
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم برفع ملفات PDF لدمجها في ملف واحد مرتب بسهولة.' : 'Upload PDF files to merge them into one organized file easily.'}
+          {t.mergeSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfs.length > 0 ? 'auto' : '200px' }}>
@@ -164,6 +176,8 @@ export default function MergePdf({ setError }) {
           )}
         </div>
       )}
+
+      <SeoContent lang={lang} t={t} type="merge" />
     </div>
   );
 }

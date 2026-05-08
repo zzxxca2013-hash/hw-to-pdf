@@ -5,13 +5,12 @@ import { jsPDF } from 'jspdf';
 import { UploadCloud, Check, Download, FileArchive, Settings } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import SeoContent from './SeoContent';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-export default function CompressPdf({ setError }) {
-  const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = translations[lang] || translations.en;
+export default function CompressPdf({ setError, t, lang }) {
   const [pdfFile, setPdfFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -27,11 +26,15 @@ export default function CompressPdf({ setError }) {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
+      if (acceptedFiles[0].size > 50 * 1024 * 1024) {
+        setError(lang === 'ar' ? 'عذراً، حجم الملف يتجاوز الحد الأقصى (50 ميجابايت)' : 'Sorry, file size exceeds maximum limit (50 MB)');
+        return;
+      }
       setPdfFile(acceptedFiles[0]);
       setResultPdfUrl(null);
       setStats(null);
     }
-  }, []);
+  }, [lang, setError]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -114,11 +117,11 @@ export default function CompressPdf({ setError }) {
   return (
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'ضغط ملف PDF' : 'Compress PDF'}
-        </h2>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
+          {t.compressTitle}
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم بتقليل حجم ملف الـ PDF الخاص بك للتمكن من إرساله ومشاركته بسهولة.' : 'Reduce the file size of your PDF easily to share it faster.'}
+          {t.compressSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -214,6 +217,8 @@ export default function CompressPdf({ setError }) {
           )}
         </div>
       )}
+
+      <SeoContent lang={lang} t={t} type="compress" />
     </div>
   );
 }

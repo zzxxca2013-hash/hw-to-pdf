@@ -5,10 +5,9 @@ import JSZip from 'jszip';
 import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import SeoContent from './SeoContent';
 
-export default function SplitPdf({ setError }) {
-  const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = translations[lang] || translations.en;
+export default function SplitPdf({ setError, t, lang }) {
   const [pdfFile, setPdfFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -16,10 +15,14 @@ export default function SplitPdf({ setError }) {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
+      if (acceptedFiles[0].size > 50 * 1024 * 1024) {
+        setError(lang === 'ar' ? 'عذراً، حجم الملف يتجاوز الحد الأقصى (50 ميجابايت)' : 'Sorry, file size exceeds maximum limit (50 MB)');
+        return;
+      }
       setPdfFile(acceptedFiles[0]);
       setResultUrl(null);
     }
-  }, []);
+  }, [lang, setError]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -74,11 +77,11 @@ export default function SplitPdf({ setError }) {
   return (
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'فصل صفحات PDF' : 'Split PDF Pages'}
-        </h2>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
+          {t.splitTitle}
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم برفع ملف PDF لاستخراج كل صفحة كملف مستقل وتحميلها جميعاً في ملف مضغوط (ZIP).' : 'Upload a PDF to extract each page as a separate file, downloaded as a ZIP.'}
+          {t.splitSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -138,6 +141,8 @@ export default function SplitPdf({ setError }) {
           )}
         </div>
       )}
+
+      <SeoContent lang={lang} t={t} type="split" />
     </div>
   );
 }

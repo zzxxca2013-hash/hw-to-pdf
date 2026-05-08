@@ -5,6 +5,7 @@ import { PDFDocument } from 'pdf-lib';
 import { UploadCloud, Trash2, Check, Download, GripVertical, FileStack } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import SeoContent from './SeoContent';
 
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -57,9 +58,7 @@ const SortablePageItem = ({ id, url, index, onRemove }) => {
   );
 };
 
-export default function OrganizePdf({ setError }) {
-  const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
-  const t = translations[lang] || translations.en;
+export default function OrganizePdf({ setError, t, lang }) {
   const [pdfFile, setPdfFile] = useState(null);
   const [originalPdfBytes, setOriginalPdfBytes] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -75,6 +74,10 @@ export default function OrganizePdf({ setError }) {
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
+      if (file.size > 50 * 1024 * 1024) {
+        setError(lang === 'ar' ? 'عذراً، حجم الملف يتجاوز الحد الأقصى (50 ميجابايت)' : 'Sorry, file size exceeds maximum limit (50 MB)');
+        return;
+      }
       setPdfFile(file);
       setResultPdfUrl(null);
       setIsProcessing(true);
@@ -193,11 +196,11 @@ export default function OrganizePdf({ setError }) {
   return (
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'إعادة ترتيب صفحات PDF' : 'Organize PDF Pages'}
-        </h2>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
+          {t.organizeTitle}
+        </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'ارفع ملف PDF، اسحب الصفحات لإعادة ترتيبها، واحذف الصفحات غير المرغوب فيها بسهولة.' : 'Upload a PDF, drag pages to reorder them, and delete unwanted pages easily.'}
+          {t.organizeSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -285,6 +288,8 @@ export default function OrganizePdf({ setError }) {
           )}
         </div>
       )}
+
+      <SeoContent lang={lang} t={t} type="organize" />
     </div>
   );
 }
