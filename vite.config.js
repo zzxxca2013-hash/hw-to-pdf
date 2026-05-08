@@ -22,6 +22,9 @@ export default defineConfig({
       }
     }
   },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   plugins: [
     react(),
     VitePWA({
