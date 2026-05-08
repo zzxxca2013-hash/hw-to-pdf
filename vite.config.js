@@ -35,6 +35,9 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',
+        start_url: '/hw-to-pdf/',
+        id: 'hw-to-pdf-app-v1',
+        categories: ['education', 'productivity', 'utilities'],
         icons: [
           {
             src: 'pwa-192x192.png',
