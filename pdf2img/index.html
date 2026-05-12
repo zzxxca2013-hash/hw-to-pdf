@@ -2,14 +2,40 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/hw-to-pdf/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/hw-to-pdf/favicon.ico" /> 
+    <link rel="icon" type="image/svg+xml" href="/hw-to-pdf/favicon.svg" fetchpriority="high" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="https://zzxxca2013-hash.github.io/hw-to-pdf/apple-touch-icon.png" />
     <meta name="robots" content="index, follow" />
-    <meta name="description" content="قم بتحويل جميع صفحات ملف الـ PDF إلى صور JPG عالية الجودة في ثوانٍ.">
+    
+    <!-- Critical CSS for FCP -->
+    <style>
+      :root {
+        --primary-color: #4f46e5;
+        --bg-color: #f8fafc;
+        --text-main: #0f172a;
+        --radius: 24px;
+        --gradient-bg: radial-gradient(circle at top left, #f1f5f9 0%, #e2e8f0 100%);
+      }
+      [data-theme='dark'] {
+        --bg-color: #0f172a;
+        --text-main: #f8fafc;
+        --gradient-bg: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
+      }
+      body {
+        margin: 0; padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: var(--gradient-bg);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: var(--text-main);
+      }
+    </style>
+
+    <meta name="description" content="استخرج جميع صفحات الـ PDF كصور عالية الجودة (JPG) بدون إنترنت">
     <meta name="keywords" content="تحويل الصور الى pdf, دمج pdf, فصل pdf, تقسيم pdf, image to pdf, merge pdf, split pdf, تحويل واجبات, jpg to pdf, png to pdf, free pdf converter">
     
     <!-- Canonical URL -->
@@ -20,31 +46,24 @@
     <meta name="application-name" content="HW to PDF Tools" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/" />
-    <meta property="og:title" content="تحويل PDF إلى صور عالية الجودة | PDF to JPG" />
-    <meta property="og:description" content="قم بتحويل جميع صفحات ملف الـ PDF إلى صور JPG عالية الجودة في ثوانٍ." />
+    <meta property="og:title" content="PDF إلى صور | HW to PDF">
+    <meta property="og:description" content="استخرج جميع صفحات الـ PDF كصور عالية الجودة (JPG) بدون إنترنت">
     <meta property="og:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/" />
-    <meta property="twitter:title" content="تحويل PDF إلى صور عالية الجودة | PDF to JPG" />
-    <meta property="twitter:description" content="قم بتحويل جميع صفحات ملف الـ PDF إلى صور JPG عالية الجودة في ثوانٍ." />
+    <meta property="twitter:title" content="PDF إلى صور | HW to PDF">
+    <meta property="twitter:description" content="استخرج جميع صفحات الـ PDF كصور عالية الجودة (JPG) بدون إنترنت">
     <meta property="twitter:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
 
     <!-- SEO Structured Data -->
     <script type="application/ld+json">
-    [{
+{
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "HW to PDF Tools",
-      "alternateName": ["أدوات PDF", "تحويل واجبات لـ PDF", "PDF Tools"],
-      "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "HW to PDF Tools",
-      "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/",
+      "@type": "SoftwareApplication",
+      "name": "HW to PDF - PDF إلى صور",
+      "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "All",
       "offers": {
@@ -52,41 +71,65 @@
         "price": "0",
         "priceCurrency": "USD"
       },
-      "description": "أسهل وأسرع أداة لترتيب وتحويل صور الواجبات المدرسية إلى ملف PDF نظيف، بالإضافة إلى أدوات مجانية لدمج وفصل وتقسيم ملفات الـ PDF بأمان وخصوصية."
-    },
-    {
+      "description": "استخرج جميع صفحات الـ PDF كصور عالية الجودة (JPG) بدون إنترنت"
+    }
+    </script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://zzxxca2013-hash.github.io;">
+  <title>PDF إلى صور | HW to PDF</title>
+  <script type="application/ld+json">
+{
       "@context": "https://schema.org",
       "@type": "FAQPage",
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "كيف أحول الـ PDF إلى صور؟",
+          "name": "كيف أحول الـ PDF إلى صور مجاناً؟",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ارفع ملف الـ PDF، وسنقوم تلقائياً باستخراج جميع الصفحات كصور عالية الدقة لتتمكن من تحميلها كملف مضغوط (ZIP)."
+            "text": "ارفع ملف الـ PDF، وسنقوم تلقائياً باستخراج جميع الصفحات كصور عالية الدقة لتتمكن من تحميلها كملف مضغوط (ZIP) بنقرة واحدة."
           }
         },
         {
           "@type": "Question",
-          "name": "هل أحتاج للإنترنت للتحويل؟",
+          "name": "هل ستقل جودة الصور المستخرجة؟",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "لا، تعمل الأداة بالكامل بدون إنترنت بمجرد تحميل الصفحة."
+            "text": "لا، نحن نحرص على استخراج الصفحات بأفضل دقة ممكنة للحفاظ على وضوح النصوص والصور."
           }
         }
       ]
-    }]
+    }
     </script>
-    <title>تحويل PDF إلى صور عالية الجودة | PDF to JPG</title>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/rolldown-runtime-DYqJImOW.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/icons-foClfNUu.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/react-vendor-YAeYgla5.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/useLocalStorage-bHObdwFz.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/translations-CMOeC8gH.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/main-zTH2pcM0.js"></script>
-    <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/react-vendor-sg0yWRLc.css">
-    <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/main-CWCLf2Iv.css">
-  <link rel="manifest" href="/hw-to-pdf/manifest.webmanifest"><script id="vite-plugin-pwa:inline-sw">if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/hw-to-pdf/sw.js', { scope: '/hw-to-pdf/' })})}</script></head>
+  <script type="application/ld+json">
+{
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "الرئيسية",
+          "item": "https://zzxxca2013-hash.github.io/hw-to-pdf/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "PDF إلى صور",
+          "item": "https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/"
+        }
+      ]
+    }
+    </script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/rolldown-runtime-DYqJImOW.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/icons-foClfNUu.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/react-vendor-YAeYgla5.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/SeoContent-BFYWycV0.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/useLocalStorage-bHObdwFz.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/translations-BfoAIaoR.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/main-B4_x4N7g.js"></script>
+  <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/react-vendor-sg0yWRLc.css">
+  <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/main-CWCLf2Iv.css">
+<link rel="manifest" href="/hw-to-pdf/manifest.webmanifest"><script id="vite-plugin-pwa:inline-sw">if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/hw-to-pdf/sw.js', { scope: '/hw-to-pdf/' })})}</script></head>
   <body>
     <noscript>أداة مجانية لتحويل ملفات PDF إلى صور. يرجى تفعيل الجافا سكريبت (JavaScript) لاستخدام الأداة بالكامل.</noscript>
     <div id="root"></div>

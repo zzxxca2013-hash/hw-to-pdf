@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <title>أدوات PDF مجانية | تحويل الصور إلى PDF، دمج وفصل الملفات</title>
+    <title>تحويل الصور إلى PDF | أدوات PDF مجانية</title>
     <link rel="icon" type="image/x-icon" href="/hw-to-pdf/favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="/hw-to-pdf/favicon.svg" />
     <link rel="icon" type="image/png" sizes="192x192" href="/hw-to-pdf/pwa-192x192.png" />
@@ -12,7 +12,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="https://zzxxca2013-hash.github.io/hw-to-pdf/apple-touch-icon.png" />
     <meta name="robots" content="index, follow" />
-    <meta name="description" content="حوّل الصور إلى PDF مجانًا بسرعة وأمان. دمج وتقسيم وضغط ملفات PDF بدون رفع الملفات أو تسجيل.">
+    <meta name="description" content="Image to PDF Converter - حوّل صورك إلى ملف PDF نظيف ومنسق بسهولة">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
+    <link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
+    
     <meta name="keywords" content="تحويل الصور الى pdf, دمج pdf, فصل pdf, تقسيم pdf, image to pdf, merge pdf, split pdf, تحويل واجبات, jpg to pdf, png to pdf, free pdf converter">
     
     <!-- Canonical URL -->
@@ -23,30 +30,23 @@
     <meta name="application-name" content="HW to PDF Tools - أدوات PDF مجانية" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
-    <meta property="og:title" content="أدوات PDF | تحويل الصور، دمج، وفصل الملفات" />
-    <meta property="og:description" content="أسهل وأسرع أداة لتحويل صور واجباتك المدرسية إلى PDF، ودمج أو فصل ملفات الـ PDF مجاناً وبأمان تام." />
+    <meta property="og:title" content="تحويل الصور إلى PDF | أدوات PDF مجانية">
+    <meta property="og:description" content="Image to PDF Converter - حوّل صورك إلى ملف PDF نظيف ومنسق بسهولة">
     <meta property="og:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
-    <meta property="twitter:title" content="أدوات PDF | تحويل الصور، دمج، وفصل الملفات" />
-    <meta property="twitter:description" content="أسهل وأسرع أداة لتحويل صور واجباتك المدرسية إلى PDF، ودمج أو فصل ملفات الـ PDF مجاناً وبأمان تام." />
+    <meta property="twitter:title" content="تحويل الصور إلى PDF | أدوات PDF مجانية">
+    <meta property="twitter:description" content="Image to PDF Converter - حوّل صورك إلى ملف PDF نظيف ومنسق بسهولة">
     <meta property="twitter:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
 
     <!-- SEO Structured Data -->
     <script type="application/ld+json">
-    [{
+{
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "HW to PDF Tools",
-      "alternateName": ["أدوات PDF", "تحويل واجبات لـ PDF", "PDF Tools"],
-      "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/"
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "HW to PDF Tools",
+      "@type": "SoftwareApplication",
+      "name": "HW to PDF - تحويل الصور إلى PDF",
       "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "All",
@@ -55,51 +55,74 @@
         "price": "0",
         "priceCurrency": "USD"
       },
-      "description": "أسهل وأسرع أداة لترتيب وتحويل صور الواجبات المدرسية إلى ملف PDF نظيف، بالإضافة إلى أدوات مجانية لدمج وفصل وتقسيم ملفات الـ PDF بأمان وخصوصية."
-    }]
+      "description": "Image to PDF Converter - حوّل صورك إلى ملف PDF نظيف ومنسق بسهولة"
+    }
     </script>
-
-    <!-- Critical CSS for FCP -->
-    <style>
-      :root {
-        --primary-color: #4f46e5;
-        --bg-color: #f8fafc;
-        --text-main: #0f172a;
-        --radius: 24px;
-        --gradient-bg: radial-gradient(circle at top left, #f1f5f9 0%, #e2e8f0 100%);
-      }
-      [data-theme='dark'] {
-        --bg-color: #0f172a;
-        --text-main: #f8fafc;
-        --gradient-bg: radial-gradient(circle at top left, #0f172a 0%, #020617 100%);
-      }
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: var(--gradient-bg);
-        background-attachment: fixed;
-        min-height: 100vh;
-        color: var(--text-main);
-      }
-      .container { max-width: 900px; margin: 0 auto; padding: 1rem; }
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: var(--radius);
-      }
-    </style>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/rolldown-runtime-DYqJImOW.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/icons-foClfNUu.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/react-vendor-YAeYgla5.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/useLocalStorage-bHObdwFz.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/translations-CMOeC8gH.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/main-zTH2pcM0.js"></script>
-    <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/react-vendor-sg0yWRLc.css">
-    <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/main-CWCLf2Iv.css">
-  <link rel="manifest" href="/hw-to-pdf/manifest.webmanifest"><script id="vite-plugin-pwa:inline-sw">if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/hw-to-pdf/sw.js', { scope: '/hw-to-pdf/' })})}</script></head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://zzxxca2013-hash.github.io;">
+  <script type="application/ld+json">
+{
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "كيف أقوم بتحويل الصور إلى PDF مجاناً من الجوال؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "الأمر بسيط جداً! قم برفع صور الواجب (سواء كانت بصيغة JPG أو PNG) في منطقة الرفع، قم بترتيبها، واضغط على زر 'تحويل إلى PDF'. سيتم تحميل الملف مباشرة مجاناً وبدون علامة مائية."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف يمكنني دمج ملفات PDF في ملف واحد للايفون والاندرويد؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "اختر أداة 'دمج PDF' من القائمة، ارفع ملفات الـ PDF المراد دمجها، رتبها بالسحب والإفلات، واضغط على دمج. الأداة تعمل من المتصفح مباشرة دون حاجة لتحميل تطبيقات."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل تحويل صور الواجبات ودمج الملفات آمن هنا؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم، آمن بنسبة 100%. على عكس المواقع الأخرى، نحن لا نقوم برفع صورك لأي سيرفرات. تتم العملية بالكامل داخل جهازك، مما يضمن سرية مستنداتك الشخصية."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف يمكن تقليل حجم ملف PDF لإرساله عبر الواتساب؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "استخدم أداة 'ضغط PDF' الخاصة بنا. قم برفع الملف الكبير وسيقوم المتصفح بتقليل حجمه مجاناً وبسرعة فائقة ليصبح مناسباً للإرسال."
+          }
+        }
+      ]
+    }
+    </script>
+  <script type="application/ld+json">
+{
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "الرئيسية",
+          "item": "https://zzxxca2013-hash.github.io/hw-to-pdf/"
+        }
+      ]
+    }
+    </script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/rolldown-runtime-DYqJImOW.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/icons-foClfNUu.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/react-vendor-YAeYgla5.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/SeoContent-BFYWycV0.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/useLocalStorage-bHObdwFz.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/translations-BfoAIaoR.js"></script>
+  <script type="module" crossorigin src="/hw-to-pdf/assets/main-B4_x4N7g.js"></script>
+  <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/react-vendor-sg0yWRLc.css">
+  <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/main-CWCLf2Iv.css">
+<link rel="manifest" href="/hw-to-pdf/manifest.webmanifest"><script id="vite-plugin-pwa:inline-sw">if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/hw-to-pdf/sw.js', { scope: '/hw-to-pdf/' })})}</script></head>
   <body>
     <noscript>أداة مجانية لتحويل الصور إلى PDF ودمج وفصل الملفات. يرجى تفعيل الجافا سكريبت (JavaScript) لاستخدام الأداة بالكامل.</noscript>
     <!-- Start Single Page Apps for GitHub Pages -->
