@@ -51,7 +51,7 @@ useEffect(() => {
   const getInitialTool = () => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
-      if (path.includes('/merge')) return 'merge';
+      if (path.includes('/merge-pdf')) return 'merge';
       if (path.includes('/split')) return 'split';
       if (path.includes('/pdf2img')) return 'pdf2img';
       if (path.includes('/organize')) return 'organize';
