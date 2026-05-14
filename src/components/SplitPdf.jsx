@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
@@ -13,6 +13,12 @@ export default function SplitPdf({ setError }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (resultUrl) URL.revokeObjectURL(resultUrl);
+    };
+  }, [resultUrl]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
@@ -38,7 +44,7 @@ export default function SplitPdf({ setError }) {
       const pageCount = pdf.getPageCount();
 
       if (pageCount > 150) {
-        setError(lang === 'ar' ? 'عذراً، لا يمكن فصل ملف يحتوي على أكثر من 150 صفحة لحماية متصفحك.' : 'Sorry, maximum limit is 150 pages to prevent browser crash.');
+        setError(t.errorMaxPages);
         setIsProcessing(false);
         return;
       }
@@ -57,7 +63,10 @@ export default function SplitPdf({ setError }) {
       setProgress(85);
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(zipBlob);
-      setResultUrl(url);
+      setResultUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
       setProgress(100);
       
       const toast = document.getElementById('success-toast');
@@ -65,7 +74,7 @@ export default function SplitPdf({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(t.errorProcessing || "Error splitting file");
+      setError(t.errorSplit);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -75,10 +84,10 @@ export default function SplitPdf({ setError }) {
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'فصل صفحات PDF' : 'Split PDF Pages'}
+          {t.splitPdfPages}
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم برفع ملف PDF لاستخراج كل صفحة كملف مستقل وتحميلها جميعاً في ملف مضغوط (ZIP).' : 'Upload a PDF to extract each page as a separate file, downloaded as a ZIP.'}
+          {t.splitPdfDesc}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -86,9 +95,9 @@ export default function SplitPdf({ setError }) {
           {!pdfFile ? (
             <div className="dropzone-content">
               <UploadCloud size={48} className="upload-icon" />
-              <h3>{lang === 'ar' ? 'اسحب ملف PDF هنا' : 'Drag PDF file here'}</h3>
+              <h3>{t.dragPdfHere}</h3>
               <button className="btn btn-primary" onClick={open}>
-                {lang === 'ar' ? 'اختيار ملف' : 'Select File'}
+                {t.selectFile}
               </button>
             </div>
           ) : (
@@ -98,7 +107,7 @@ export default function SplitPdf({ setError }) {
                 {pdfFile.name}
               </span>
               <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); setPdfFile(null); setResultUrl(null); }}>
-                <Trash2 size={16} /> {lang === 'ar' ? 'إزالة الملف' : 'Remove File'}
+                <Trash2 size={16} /> {t.removeFile}
               </button>
             </div>
           )}
@@ -108,7 +117,7 @@ export default function SplitPdf({ setError }) {
       {pdfFile && !resultUrl && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <button className="btn btn-primary generate-btn" onClick={handleSplit} disabled={isProcessing}>
-             {lang === 'ar' ? 'فصل الصفحات الآن' : 'Split Pages Now'}
+             {t.splitNow}
           </button>
         </div>
       )}
@@ -117,10 +126,10 @@ export default function SplitPdf({ setError }) {
         <div className="glass-panel result-panel" style={{ padding: '2rem', textAlign: 'center' }}>
           <h2 style={{ color: 'var(--success-color)', marginBottom: '1.5rem' }}>
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {lang === 'ar' ? 'تم استخراج الصفحات بنجاح!' : 'Pages extracted successfully!'}
+            {t.splitSuccess}
           </h2>
           <a href={resultUrl} download={`${pdfFile.name.replace('.pdf','')}-pages.zip`} className="btn btn-success" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
-            {lang === 'ar' ? 'تحميل كملف ZIP' : 'Download as ZIP'}
+            {t.downloadZip}
           </a>
         </div>
       )}

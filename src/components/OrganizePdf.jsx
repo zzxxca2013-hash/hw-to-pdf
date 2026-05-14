@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
@@ -67,6 +67,12 @@ export default function OrganizePdf({ setError }) {
   const [pages, setPages] = useState([]);
   const [resultPdfUrl, setResultPdfUrl] = useState(null);
 
+  useEffect(() => {
+    return () => {
+      if (resultPdfUrl) URL.revokeObjectURL(resultPdfUrl);
+    };
+  }, [resultPdfUrl]);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -88,7 +94,7 @@ export default function OrganizePdf({ setError }) {
         const numPages = pdf.numPages;
         
         if (numPages > 150) {
-          setError(lang === 'ar' ? 'عذراً، لا يمكن معالجة أكثر من 150 صفحة في المرة الواحدة' : 'Sorry, maximum limit is 150 pages at once');
+          setError(t.errorMaxPagesOrganize);
           setIsProcessing(false);
           return;
         }
@@ -115,13 +121,13 @@ export default function OrganizePdf({ setError }) {
         setProgress(100);
       } catch (err) {
         console.error(err);
-        setError(lang === 'ar' ? 'فشل قراءة الملف.' : 'Failed to read file.');
+        setError(t.errorReadingFile);
         setPdfFile(null);
       } finally {
         setTimeout(() => setIsProcessing(false), 500);
       }
     }
-  }, [lang, setError]);
+  }, [setError, t.errorMaxPagesOrganize, t.errorReadingFile]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -152,7 +158,7 @@ export default function OrganizePdf({ setError }) {
 
   const handleGeneratePdf = async () => {
     if (pages.length === 0) {
-      setError(lang === 'ar' ? 'يجب أن يحتوي الملف على صفحة واحدة على الأقل' : 'File must contain at least one page');
+      setError(t.errorMinOnePage);
       return;
     }
     
@@ -173,7 +179,10 @@ export default function OrganizePdf({ setError }) {
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       
-      setResultPdfUrl(url);
+      setResultPdfUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
       setProgress(100);
       
       const toast = document.getElementById('success-toast');
@@ -181,7 +190,7 @@ export default function OrganizePdf({ setError }) {
       
     } catch (err) {
       console.error(err);
-      setError(lang === 'ar' ? 'فشل إنشاء الملف الجديد.' : 'Failed to generate new PDF.');
+      setError(t.errorGeneratingNewPdf);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -191,10 +200,10 @@ export default function OrganizePdf({ setError }) {
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'إعادة ترتيب صفحات PDF' : 'Organize PDF Pages'}
+          {t.organizeTitle}
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'ارفع ملف PDF، اسحب الصفحات لإعادة ترتيبها، واحذف الصفحات غير المرغوب فيها بسهولة.' : 'Upload a PDF, drag pages to reorder them, and delete unwanted pages easily.'}
+          {t.organizeSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -202,9 +211,9 @@ export default function OrganizePdf({ setError }) {
           {!pdfFile ? (
             <div className="dropzone-content">
               <UploadCloud size={48} className="upload-icon" />
-              <h3>{lang === 'ar' ? 'اسحب ملف PDF هنا' : 'Drag PDF file here'}</h3>
+              <h3>{t.dragPdfHere}</h3>
               <button className="btn btn-primary" onClick={open}>
-                {lang === 'ar' ? 'اختيار ملف' : 'Select File'}
+                {t.selectFile}
               </button>
             </div>
           ) : (
@@ -214,7 +223,7 @@ export default function OrganizePdf({ setError }) {
                 <span style={{ fontWeight: '500' }}>{pdfFile.name}</span>
               </div>
               <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); setPdfFile(null); setPages([]); setResultPdfUrl(null); setOriginalPdfBytes(null); }}>
-                <Trash2 size={16} /> {lang === 'ar' ? 'تغيير الملف' : 'Change File'}
+                <Trash2 size={16} /> {t.changeFile}
               </button>
             </div>
           )}
@@ -225,10 +234,10 @@ export default function OrganizePdf({ setError }) {
         <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
-              {lang === 'ar' ? 'اسحب الصفحات للترتيب، أو اضغط سلة المهملات للحذف' : 'Drag pages to reorder, or click trash icon to delete'}
+              {t.organizeDragHint}
             </p>
             <span className="badge" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
-              {pages.length} {lang === 'ar' ? 'صفحة' : 'Pages'}
+              {t.imageCount(pages.length)} {/* Using imageCount for generic count */}
             </span>
           </div>
 
@@ -250,7 +259,7 @@ export default function OrganizePdf({ setError }) {
 
           <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
             <button className="btn btn-primary generate-btn" onClick={handleGeneratePdf} disabled={isProcessing}>
-               {lang === 'ar' ? 'حفظ الترتيب كملف PDF جديد' : 'Save Order as New PDF'}
+               {t.saveOrderAsNewPdf}
             </button>
           </div>
         </div>
@@ -260,11 +269,11 @@ export default function OrganizePdf({ setError }) {
         <div className="glass-panel result-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
           <h2 style={{ color: 'var(--success-color)', marginBottom: '1.5rem' }}>
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {lang === 'ar' ? 'تم إنشاء الملف الجديد بنجاح!' : 'New PDF generated successfully!'}
+            {t.organizeSuccess}
           </h2>
           <a href={resultPdfUrl} download={`organized-${pdfFile.name}`} className="btn btn-success" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
             <Download size={20} />
-            {lang === 'ar' ? 'تحميل الملف الجديد' : 'Download New PDF'}
+            {t.downloadNewPdf}
           </a>
         </div>
       )}

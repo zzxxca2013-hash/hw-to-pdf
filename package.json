@@ -1,4 +1,5 @@
 {
+  "homepage": "https://zzxxca2013-hash.github.io/hw-to-pdf/",
   "name": "hw-to-pdf",
   "private": true,
   "version": "1.0.0",
@@ -27,8 +28,7 @@
     "react-dropzone": "^15.0.0",
     "react-image-crop": "^11.0.10",
     "react-router-dom": "^7.14.2",
-    "sharp": "^0.34.5",
-    "vite-plugin-pwa": "^1.2.0"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -40,6 +40,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "gh-pages": "^6.3.0",
     "globals": "^17.5.0",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

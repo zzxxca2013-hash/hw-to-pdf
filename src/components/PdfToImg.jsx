@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
@@ -20,6 +20,18 @@ export default function PdfToImg({ setError }) {
   const [images, setImages] = useState([]);
   const [resultZipUrl, setResultZipUrl] = useState(null);
 
+  useEffect(() => {
+    return () => {
+      if (resultZipUrl) URL.revokeObjectURL(resultZipUrl);
+    };
+  }, [resultZipUrl]);
+
+  useEffect(() => {
+    return () => {
+      images.forEach(img => URL.revokeObjectURL(img.url));
+    };
+  }, [images]);
+
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
       setPdfFile(acceptedFiles[0]);
@@ -40,13 +52,13 @@ export default function PdfToImg({ setError }) {
     setIsProcessing(true);
     setProgress(5);
     setImages([]);
+    let extractedImages = [];
     
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const numPages = pdf.numPages;
       const zip = new JSZip();
-      const extractedImages = [];
 
       for (let i = 1; i <= numPages; i++) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 75));
@@ -75,11 +87,15 @@ export default function PdfToImg({ setError }) {
       }
 
       setImages(extractedImages);
+      extractedImages = [];
       setProgress(85);
       
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const zipUrl = URL.createObjectURL(zipBlob);
-      setResultZipUrl(zipUrl);
+      setResultZipUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return zipUrl;
+      });
       setProgress(100);
       
       const toast = document.getElementById('success-toast');
@@ -87,7 +103,8 @@ export default function PdfToImg({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(lang === 'ar' ? 'حدث خطأ أثناء استخراج الصور' : 'Error extracting images');
+      extractedImages.forEach(img => URL.revokeObjectURL(img.url));
+      setError(t.errorExtractingImages);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -97,10 +114,10 @@ export default function PdfToImg({ setError }) {
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'تحويل PDF إلى صور' : 'PDF to Images'}
+          {t.pdf2imgTitle}
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم برفع ملف PDF لتحويل جميع صفحاته إلى صور عالية الجودة (JPG).' : 'Upload a PDF to convert all its pages into high-quality images (JPG).'}
+          {t.pdf2imgSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -108,9 +125,9 @@ export default function PdfToImg({ setError }) {
           {!pdfFile ? (
             <div className="dropzone-content">
               <UploadCloud size={48} className="upload-icon" />
-              <h3>{lang === 'ar' ? 'اسحب ملف PDF هنا' : 'Drag PDF file here'}</h3>
+              <h3>{t.dragPdfHere}</h3>
               <button className="btn btn-primary" onClick={open}>
-                {lang === 'ar' ? 'اختيار ملف' : 'Select File'}
+                {t.selectFile}
               </button>
             </div>
           ) : (
@@ -120,7 +137,7 @@ export default function PdfToImg({ setError }) {
                 {pdfFile.name}
               </span>
               <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); setPdfFile(null); setResultZipUrl(null); setImages([]); }}>
-                <Trash2 size={16} /> {lang === 'ar' ? 'إزالة الملف' : 'Remove File'}
+                <Trash2 size={16} /> {t.removeFile}
               </button>
             </div>
           )}
@@ -130,7 +147,7 @@ export default function PdfToImg({ setError }) {
       {pdfFile && !resultZipUrl && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <button className="btn btn-primary generate-btn" onClick={handleExtractImages} disabled={isProcessing}>
-             {lang === 'ar' ? 'تحويل إلى صور الآن' : 'Convert to Images Now'}
+             {t.pdf2imgConvertNow}
           </button>
         </div>
       )}
@@ -139,18 +156,18 @@ export default function PdfToImg({ setError }) {
         <div className="glass-panel result-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
           <h2 style={{ color: 'var(--success-color)', marginBottom: '1.5rem' }}>
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {lang === 'ar' ? 'تم استخراج الصور بنجاح!' : 'Images extracted successfully!'}
+            {t.pdf2imgSuccess}
           </h2>
           <a href={resultZipUrl} download={`${pdfFile.name.replace('.pdf','')}-images.zip`} className="btn btn-success" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
             <DownloadCloud size={20} />
-            {lang === 'ar' ? 'تحميل جميع الصور (ZIP)' : 'Download All Images (ZIP)'}
+            {t.downloadAllImagesZip}
           </a>
         </div>
       )}
 
       {images.length > 0 && (
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>{lang === 'ar' ? 'معاينة الصور المستخرجة' : 'Extracted Images Preview'}</h3>
+        <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>{t.extractedImagesPreview}</h3>
           <div className="images-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
             {images.map((img) => (
               <div key={img.id} className="image-card" style={{ position: 'relative' }}>

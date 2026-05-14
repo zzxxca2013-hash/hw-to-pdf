@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
-import { UploadCloud, FileText, Trash2, ArrowDownAZ, Settings, Check, X } from 'lucide-react';
+import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -13,8 +13,14 @@ export default function MergePdf({ setError }) {
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState(null);
 
+  useEffect(() => {
+    return () => {
+      if (resultUrl) URL.revokeObjectURL(resultUrl);
+    };
+  }, [resultUrl]);
+
   const onDrop = useCallback(async (acceptedFiles) => {
-    setIsProcessing(true);
+    if (acceptedFiles.length === 0) return; // Prevent processing if no files dropped
     setProgress(20);
     try {
       const newPdfs = acceptedFiles.map(file => ({
@@ -23,13 +29,14 @@ export default function MergePdf({ setError }) {
         name: file.name
       }));
       setPdfs(prev => [...prev, ...newPdfs]);
-    } catch (err) {
+      setResultUrl(null); // Clear previous result if new files are added
+    } catch {
       setError(t.errorProcessing || "Error adding files");
     } finally {
       setIsProcessing(false);
       setProgress(0);
     }
-  }, []);
+  }, [setError, t.errorProcessing]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -44,7 +51,7 @@ export default function MergePdf({ setError }) {
 
   const handleMerge = async () => {
     if (pdfs.length < 2) {
-      setError(lang === 'ar' ? "الرجاء اختيار ملفي PDF على الأقل" : "Please select at least 2 PDF files");
+      setError(t.errorMinTwoPdfs);
       return;
     }
     setIsProcessing(true);
@@ -65,7 +72,10 @@ export default function MergePdf({ setError }) {
       const pdfBytes = await mergedPdf.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      setResultUrl(url);
+      setResultUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
       setProgress(100);
       
       const toast = document.getElementById('success-toast');
@@ -83,10 +93,10 @@ export default function MergePdf({ setError }) {
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'دمج ملفات PDF' : 'Merge PDF Files'}
+          {t.mergeTitle}
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم برفع ملفات PDF لدمجها في ملف واحد مرتب بسهولة.' : 'Upload PDF files to merge them into one organized file easily.'}
+          {t.mergeSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfs.length > 0 ? 'auto' : '200px' }}>
@@ -94,9 +104,9 @@ export default function MergePdf({ setError }) {
           {pdfs.length === 0 ? (
             <div className="dropzone-content">
               <UploadCloud size={48} className="upload-icon" />
-              <h3>{lang === 'ar' ? 'اسحب ملفات PDF هنا' : 'Drag PDF files here'}</h3>
+              <h3>{t.dragPdfFilesHere}</h3>
               <button className="btn btn-primary" onClick={open}>
-                {lang === 'ar' ? 'اختيار الملفات' : 'Select Files'}
+                {t.selectFiles}
               </button>
             </div>
           ) : (
@@ -122,10 +132,10 @@ export default function MergePdf({ setError }) {
         {pdfs.length > 0 && (
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={open}>
-              {lang === 'ar' ? 'إضافة المزيد' : 'Add More'}
+              {t.addMore}
             </button>
             <button className="btn btn-danger" onClick={() => { setPdfs([]); setResultUrl(null); }}>
-              <Trash2 size={16} /> {lang === 'ar' ? 'مسح الكل' : 'Clear All'}
+              <Trash2 size={16} /> {t.clearAll}
             </button>
           </div>
         )}
@@ -134,7 +144,7 @@ export default function MergePdf({ setError }) {
       {pdfs.length > 1 && !resultUrl && (
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <button className="btn btn-primary generate-btn" onClick={handleMerge} disabled={isProcessing}>
-             {lang === 'ar' ? 'دمج الملفات الآن' : 'Merge Files Now'}
+             {t.mergeNow}
           </button>
         </div>
       )}
@@ -143,10 +153,10 @@ export default function MergePdf({ setError }) {
         <div className="glass-panel result-panel" style={{ padding: '2rem', textAlign: 'center' }}>
           <h2 style={{ color: 'var(--success-color)', marginBottom: '1.5rem' }}>
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {lang === 'ar' ? 'تم دمج الملف بنجاح!' : 'File merged successfully!'}
+            {t.mergeSuccess}
           </h2>
           <a href={resultUrl} download="merged-document.pdf" className="btn btn-success" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
-            {lang === 'ar' ? 'تحميل الملف المدمج' : 'Download Merged PDF'}
+            {t.downloadMergedPdf}
           </a>
         </div>
       )}

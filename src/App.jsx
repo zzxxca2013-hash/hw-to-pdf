@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { jsPDF } from 'jspdf';
-import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, rectSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import confetti from 'canvas-confetti';
@@ -36,13 +36,13 @@ function App() {
   const [blackAndWhite, setBlackAndWhite] = useLocalStorage('hw-pdf-bw', false);
   const [scannerMode, setScannerMode] = useLocalStorage('hw-pdf-scanner', false);
   
-  const getSmartFilename = () => {
+  const getSmartFilename = (targetLang = lang) => {
     const d = new Date();
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    return lang === 'ar' ? `واجب_${dateStr}` : `Homework_${dateStr}`;
+    return targetLang === 'ar' ? `واجب_${dateStr}` : `Homework_${dateStr}`;
   };
 
-  const [fileName, setFileName] = useState(getSmartFilename());
+  const [fileName, setFileName] = useState(() => getSmartFilename(lang));
   const [watermark, setWatermark] = useLocalStorage('hw-pdf-watermark', '');
   const getInitialTool = () => {
     if (typeof window !== 'undefined') {
@@ -78,6 +78,17 @@ function App() {
   const iframeRef = useRef(null);
 
   const t = translations[lang];
+  const draftSuccessMessageRef = useRef(t.messages.success);
+  const imagesRef = useRef(images);
+  const pdfUrlRef = useRef(pdfUrl);
+
+  const clearPdfResult = useCallback(() => {
+    setPdfUrl(prev => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setPdfBlob(null);
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -101,14 +112,26 @@ function App() {
   useEffect(() => {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-    if (!fileName || fileName.startsWith('واجب_') || fileName.startsWith('Homework_')) {
-      setFileName(getSmartFilename());
-    }
   }, [lang]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => {
+    pdfUrlRef.current = pdfUrl;
+  }, [pdfUrl]);
+
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach(img => URL.revokeObjectURL(img.previewUrl));
+      if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
+    };
+  }, []);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -149,14 +172,14 @@ function App() {
 
   // Dynamic Tab Title
   useEffect(() => {
-    const currentTitle = activeTool === 'img2pdf' ? t.title : activeTool === 'merge' ? t.mergeTitle : activeTool === 'split' ? t.splitTitle : activeTool === 'pdf2img' ? t.pdf2imgTitle : activeTool === 'compress' ? t.compressTitle : t.organizeTitle;
+    const currentTitle = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
     document.title = currentTitle;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         document.title = lang === 'ar' ? 'لا تنسَ تحويل واجبك! 📚' : 'Don\'t forget your homework! 📚';
       } else {
-        document.title = currentTitle;
+        document.title = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -166,12 +189,13 @@ function App() {
   // Welcome Toast for new users
   useEffect(() => {
     if (!hasVisited) {
-      setTimeout(() => {
-        setSuccess(lang === 'ar' ? 'مرحباً بك! ابدأ بإضافة صور واجبك هنا.' : 'Welcome! Start by adding your homework images here.');
+      const timer = setTimeout(() => {
+        setSuccess(t.messages.welcome);
         setHasVisited(true);
       }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [hasVisited, lang, setHasVisited]);
+  }, [hasVisited, lang, setHasVisited, t.messages.welcome]);
 
   // Draft Recovery
   useEffect(() => {
@@ -185,12 +209,12 @@ function App() {
           previewUrl: URL.createObjectURL(d.file)
         }));
         setImages(recovered);
-        setSuccess(lang === 'ar' ? 'تم استعادة ملفاتك غير المحفوظة بنجاح!' : 'Unsaved files restored successfully!');
+        setSuccess(draftSuccessMessageRef.current);
       }
     };
     recoverDraft();
     return () => { isMounted = false; };
-  }, [lang]);
+  }, []);
 
   // Save Draft
   useEffect(() => {
@@ -201,17 +225,27 @@ function App() {
     }
   }, [images]);
 
-  const toggleLang = () => setLang(prev => prev === 'en' ? 'ar' : 'en');
+  const toggleLang = () => {
+    setLang(prev => {
+      const nextLang = prev === 'en' ? 'ar' : 'en';
+      setFileName(current => (
+        !current || current.startsWith('واجب_') || current.startsWith('Homework_')
+          ? getSmartFilename(nextLang)
+          : current
+      ));
+      return nextLang;
+    });
+  };
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (images.length + acceptedFiles.length > 100) {
-      setError(t.maxImagesError);
+      setError(t.upload.maxError);
       return;
     }
 
     setError(null);
-    setPdfUrl(null);
+    clearPdfResult();
     setIsProcessing(true);
 
     try {
@@ -244,12 +278,12 @@ function App() {
       if (acceptedFiles.length > 0) {
         setFileName(prev => prev ? prev : acceptedFiles[0].name.replace(/\.[^/.]+$/, ""));
       }
-    } catch (err) {
-      setError(t.errorProcessing);
+    } catch {
+      setError(t.messages.errorProcessing);
     } finally {
       setIsProcessing(false);
     }
-  }, [images]);
+  }, [clearPdfResult, images, t.messages.errorProcessing, t.upload.maxError]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
@@ -275,17 +309,14 @@ function App() {
       if (img) URL.revokeObjectURL(img.previewUrl);
       return prev.filter(i => i.id !== id);
     });
-    setPdfUrl(prev => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
+    clearPdfResult();
   };
 
   const rotateImage = (id) => {
     setImages(prev => prev.map(img => 
       img.id === id ? { ...img, rotation: (img.rotation + 90) % 360 } : img
     ));
-    setPdfUrl(null);
+    clearPdfResult();
   };
 
   const autoSortImages = () => {
@@ -297,17 +328,14 @@ function App() {
       });
       return sorted;
     });
-    setPdfUrl(null);
+    clearPdfResult();
   };
 
   const confirmClearAll = () => {
     images.forEach(img => URL.revokeObjectURL(img.previewUrl));
     setImages([]);
     setError(null);
-    setPdfUrl(prev => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
+    clearPdfResult();
     setCroppingImageId(null);
     setShowClearConfirm(false);
   };
@@ -327,14 +355,11 @@ function App() {
         }
         return img;
       }));
-      setPdfUrl(prev => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
+      clearPdfResult();
       setCroppingImageId(null);
     } catch (err) {
       console.error('Error applying crop:', err);
-      setError(t.errorProcessing);
+      setError(t.messages.errorProcessing);
       setCroppingImageId(null);
     }
   };
@@ -360,7 +385,7 @@ function App() {
         const newIndex = items.findIndex(i => i.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
-      setPdfUrl(null);
+      clearPdfResult();
     }
   };
 
@@ -418,7 +443,7 @@ function App() {
 
   const generatePDF = async () => {
     if (images.length === 0) {
-      setError(t.errorNoImages);
+      setError(t.messages.errorNoImages);
       return;
     }
     
@@ -426,8 +451,7 @@ function App() {
     setProgress(0);
     setError(null);
     setSuccess(null);
-    setPdfUrl(null);
-    setPdfBlob(null);
+    clearPdfResult();
 
     try {
       const pdf = new jsPDF({
@@ -441,8 +465,8 @@ function App() {
 
       for (let i = 0; i < images.length; i++) {
         const img = images[i];
-        setProcessingText(lang === 'ar' ? `جاري معالجة الصورة ${i + 1} من ${images.length}...` : `Processing image ${i + 1} of ${images.length}...`);
-        
+        // setProcessingText(lang === 'ar' ? `جاري معالجة الصورة ${i + 1} من ${images.length}...` : `Processing image ${i + 1} of ${images.length}...`); // Old hardcoded text
+        setProcessingText(t.processingImage.replace('{current}', i + 1).replace('{total}', images.length));
         if (i > 0) pdf.addPage();
         
         const dataUrl = await processImageForPDF(img.previewUrl, img.rotation);
@@ -478,13 +502,16 @@ function App() {
         setProgress(Math.round(((i + 1) / images.length) * 100));
       }
 
-      setProcessingText(lang === 'ar' ? 'جاري إنشاء ملف الـ PDF النهائي...' : 'Finalizing PDF file...');
+      setProcessingText(t.messages.finalizingPdf);
       
       const generatedBlob = pdf.output('blob');
       const url = URL.createObjectURL(generatedBlob);
-      setPdfUrl(url);
+      setPdfUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
       setPdfBlob(generatedBlob);
-      setSuccess(t.pdfSuccess);
+      setSuccess(t.messages.success);
       
       const duration = 3000;
       const animationEnd = Date.now() + duration;
@@ -501,7 +528,7 @@ function App() {
       
     } catch (err) {
       console.error(err);
-      setError(t.errorProcessing);
+      setError(t.messages.errorProcessing);
     } finally {
       setIsProcessing(false);
       setProgress(0);
@@ -518,14 +545,14 @@ function App() {
       try {
         await navigator.share({
           title: fileName || getSmartFilename(),
-          text: t.subtitle,
+          text: t.common.subtitle,
           files: [file]
         });
       } catch (err) {
         console.error('Share failed:', err);
       }
     } else {
-      alert(lang === 'ar' ? 'عذراً، متصفحك أو جهازك لا يدعم مشاركة الملفات المباشرة.' : 'Sorry, your browser does not support direct file sharing.');
+      alert(t.shareNotSupported);
     }
   };
 
@@ -544,15 +571,15 @@ function App() {
     if (navigator.canShare) {
       try {
         await navigator.share({
-          title: t.title,
-          text: t.seoDescription || t.subtitle,
+          title: t.common.title,
+          text: t.seoText || t.common.subtitle, // Use t.seoText if available, otherwise common.subtitle
           url: window.location.href
         });
       } catch (err) {
         console.error('Share App failed:', err);
       }
     } else {
-      alert(lang === 'ar' ? 'انسخ هذا الرابط لمشاركته: ' + window.location.href : 'Copy this link to share: ' + window.location.href);
+      alert(t.messages.copyLinkToShare + window.location.href);
     }
   };
 
@@ -565,26 +592,26 @@ function App() {
       <main className="container">
         <header className="header">
         <div className="header-content">
-          <h1>{activeTool === 'img2pdf' ? t.title : activeTool === 'merge' ? t.mergeTitle : activeTool === 'split' ? t.splitTitle : activeTool === 'pdf2img' ? t.pdf2imgTitle : activeTool === 'compress' ? t.compressTitle : t.organizeTitle}</h1>
-          <p>{activeTool === 'img2pdf' ? t.subtitle : activeTool === 'merge' ? t.mergeSubtitle : activeTool === 'split' ? t.splitSubtitle : activeTool === 'pdf2img' ? t.pdf2imgSubtitle : activeTool === 'compress' ? t.compressSubtitle : t.organizeSubtitle}</p>
+          <h1>{activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title}</h1>
+          <p>{activeTool === 'img2pdf' ? t.common.subtitle : t.tools[activeTool]?.subtitle}</p>
         </div>
         <div className="controls">
           {deferredPrompt && (
             <button className="btn btn-primary" onClick={handleInstallApp} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', borderRadius: '20px', gap: '0.4rem' }}>
               <DownloadCloud size={18} />
-              <span className="hide-on-mobile">{t.installApp || 'Install App'}</span>
+              <span className="hide-on-mobile">{t.actions.install}</span>
             </button>
           )}
           {!isOnline && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: 'rgba(0,0,0,0.05)', borderRadius: '20px' }}>
               <WifiOff size={16} />
-              <span className="hide-on-mobile">{t.offlineMode}</span>
+              <span className="hide-on-mobile">{t.ui.offline}</span>
             </div>
           )}
-          <button className="icon-button" onClick={toggleLang} aria-label={t.toggleLang} title={t.toggleLang}>
+          <button className="icon-button" onClick={toggleLang} aria-label={t.ui.toggleLang} title={t.ui.toggleLang}>
             <Languages size={20} />
           </button>
-          <button className="icon-button" onClick={toggleTheme} aria-label={t.toggleTheme} title={t.toggleTheme}>
+          <button className="icon-button" onClick={toggleTheme} aria-label={t.ui.toggleTheme} title={t.ui.toggleTheme}>
             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
         </div>
@@ -647,21 +674,21 @@ function App() {
               <div className="toolbar glass-panel">
                 <div className="toolbar-toggles">
                   <div className="toggle-container" onClick={() => { setScannerMode(!scannerMode); if (!scannerMode) { setEnhance(false); setBlackAndWhite(false); } }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.scannerMode}</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.scanner}</span>
                     <div className={`toggle-switch ${scannerMode ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
                   </div>
                   
                   <div className="toggle-container" onClick={() => { setEnhance(!enhance); if (!enhance) setScannerMode(false); }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.enhanceToggle}</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.enhance}</span>
                     <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
                   </div>
                   
                   <div className="toggle-container" onClick={() => { setBlackAndWhite(!blackAndWhite); if (!blackAndWhite) setScannerMode(false); }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.bwToggle}</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.bw}</span>
                     <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
                       <div className="toggle-knob"></div>
                     </div>
@@ -670,13 +697,13 @@ function App() {
 
                 <div className="toolbar-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span className="image-count-text hide-on-mobile">
-                    {t.imageCount(images.length)}
+                    {t.ui.imageCount(images.length)}
                   </span>
                   
                   <button className="btn" style={{ background: 'var(--primary-color)', color: 'white', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={open}>
                     <ImagePlus size={16} />
-                    {t.addMore}
-                  </button>
+                    {t.upload.addMore}
+                  </button> {/* This is for adding more images, not generic "Add More" */}
 
                   <button className="icon-button" style={{ width: '32px', height: '32px', padding: 0 }} onClick={() => document.getElementById('cameraInput').click()}>
                     <Camera size={16} />
@@ -685,19 +712,19 @@ function App() {
                   {images.length > 1 && (
                     <button className="btn" style={{ background: 'var(--border-color)', color: 'var(--text-main)', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={autoSortImages}>
                       <ArrowDownAZ size={16} />
-                      <span className="hide-on-mobile">{t.autoSort}</span>
+                      <span className="hide-on-mobile">{t.editor.autoSort}</span>
                     </button>
                   )}
                   <button className="btn btn-danger clear-btn" onClick={() => setShowClearConfirm(true)}>
                     <Trash2 size={16} />
-                    <span className="hide-on-mobile">{t.clearAll}</span>
+                    <span className="hide-on-mobile">{t.actions.clearAll}</span> {/* Unify with t.actions.clearAll */}
                   </button>
                 </div>
               </div>
 
               {images.length > 1 && (
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem', fontStyle: 'italic' }}>
-                  {t.dragHint}
+                  {t.editor.dragHint}
                 </p>
               )}
 
@@ -720,7 +747,7 @@ function App() {
                     ))}
                       <div className="add-more-card" onClick={open}>
                         <Plus size={40} className="add-more-icon" />
-                        <span>{t.addMoreImages}</span>
+                        <span>{t.upload.addMore}</span> {/* Unify with t.upload.addMore */}
                       </div>
                   </div>
                 </SortableContext>
@@ -730,27 +757,27 @@ function App() {
                 {!pdfUrl ? (
                   <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)} disabled={isProcessing}>
                     <FileDown size={22} />
-                    {t.convertToPdf}
+                    {t.actions.convert}
                   </button>
                 ) : (
                   <>
                     <a href={pdfUrl} download={`${fileName || getSmartFilename()}.pdf`} className="btn btn-success">
                       <Download size={22} />
-                      {t.downloadPdf}
+                      {t.actions.download}
                     </a>
                     
                     {typeof navigator !== 'undefined' && navigator.canShare && (
                       <button className="btn" style={{ background: '#3b82f6', color: 'white' }} onClick={handleShare}>
                         <Share2 size={22} />
-                        {t.sharePdf || 'Share PDF'}
+                        {t.actions.share}
                       </button>
                     )}
 
                     <button className="btn" style={{ background: 'var(--secondary-color)', color: 'white' }} onClick={() => setShowPreviewModal(true)}>
-                      {t.previewPdf || (lang === 'ar' ? 'معاينة الـ PDF' : 'Preview PDF')}
+                      {t.editor.preview}
                     </button>
                     <button className="btn btn-primary" onClick={() => setShowSettingsModal(true)}>
-                      {lang === 'ar' ? 'تعديل الخيارات' : 'Edit Options'}
+                      {t.settings.title}
                     </button>
                   </>
                 )}
@@ -760,13 +787,13 @@ function App() {
 
           {images.length === 0 && (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-              <p>{t.noImages}</p>
+              <p>{t.messages.noImages}</p>
             </div>
           )}
             </>
           )}
 
-          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}><div className="spinner"></div></div>}>
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}><div className="spinner"></div></div>}> {/* This Suspense is for lazy-loaded components */}
             {activeTool === 'merge' && <MergePdf setError={setError} />}
             {activeTool === 'split' && <SplitPdf setError={setError} />}
             {activeTool === 'pdf2img' && <PdfToImg setError={setError} />}
@@ -774,12 +801,13 @@ function App() {
             {activeTool === 'compress' && <CompressPdf setError={setError} />}
           </Suspense>
 
-          {/* Dynamic SEO Variables based on active tool */}
-          {(() => {
-            const currentSeoTitle = activeTool === 'img2pdf' ? t.seoTitle : activeTool === 'merge' ? t.mergeSeoTitle : activeTool === 'split' ? t.splitSeoTitle : activeTool === 'pdf2img' ? t.pdf2imgSeoTitle : activeTool === 'compress' ? t.compressSeoTitle : t.organizeSeoTitle;
-            const currentSeoText = activeTool === 'img2pdf' ? t.seoText : activeTool === 'merge' ? t.mergeSeoText : activeTool === 'split' ? t.splitSeoText : activeTool === 'pdf2img' ? t.pdf2imgSeoText : activeTool === 'compress' ? t.compressSeoText : t.organizeSeoText;
+          {/* SEO and FAQ sections (always rendered if on home page, not dependent on lazy loading) */}
+          {activePage === 'home' && (() => {
+            const currentTool = activeTool === 'img2pdf' ? null : t.tools[activeTool];
+            const currentSeoTitle = activeTool === 'img2pdf' ? t.seoTitle : currentTool?.seoTitle;
+            const currentSeoText = activeTool === 'img2pdf' ? t.seoText : currentTool?.seoText;
             const currentFaqTitle = t.faqTitle;
-            const currentFaq = activeTool === 'img2pdf' ? t.faq : activeTool === 'merge' ? t.mergeFaq : activeTool === 'split' ? t.splitFaq : activeTool === 'pdf2img' ? t.pdf2imgFaq : activeTool === 'compress' ? t.compressFaq : t.organizeFaq;
+            const currentFaq = activeTool === 'img2pdf' ? t.faq : currentTool?.faq;
 
             return (
               <>
@@ -829,11 +857,9 @@ function App() {
         </>
       ) : (
         <div className="page-content glass-panel" style={{ padding: '2.5rem', textAlign: 'start', minHeight: '50vh' }}>
-          <button className="btn btn-primary" onClick={() => setActivePage('home')} style={{ marginBottom: '2rem' }}>
-            {t.home}
-          </button>
+          <button className="btn btn-primary" onClick={() => setActivePage('home')} style={{ marginBottom: '2rem' }}>{t.nav.home}</button>
           <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>
-            {activePage === 'privacy' ? t.privacyPolicy : activePage === 'terms' ? t.termsOfUse : t.contactUs}
+            {activePage === 'privacy' ? t.nav.privacyPolicy : activePage === 'terms' ? t.nav.termsOfUse : t.nav.contactUs}
           </h2>
           <p style={{ color: 'var(--text-main)', lineHeight: '2', fontSize: '1.1rem' }}>
             {activePage === 'privacy' ? t.privacyText : activePage === 'terms' ? t.termsText : t.contactText}
@@ -854,7 +880,7 @@ function App() {
       {isProcessing && (
         <div className="loading-overlay">
           <div className="spinner"></div>
-          <h2 style={{ marginBottom: progress > 0 ? '1rem' : '0' }}>{t.processing}</h2>
+          <h2 style={{ marginBottom: progress > 0 ? '1rem' : '0' }}>{t.common.processing}</h2>
           {progress > 0 && (
             <div style={{ width: '80%', maxWidth: '300px', textAlign: 'center' }}>
               <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.2)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.5rem' }}>
@@ -887,17 +913,17 @@ function App() {
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               
               <div className="setting-card glass-panel" style={{ padding: '1rem' }}>
-                <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); setPdfUrl(null); }}>
+                <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); clearPdfResult(); }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
                   <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`}><div className="toggle-knob"></div></div>
                 </div>
-                <div className="setting-row" onClick={() => { setAddMargins(!addMargins); setPdfUrl(null); }} style={{ marginTop: '1rem' }}>
+                <div className="setting-row" onClick={() => { setAddMargins(!addMargins); clearPdfResult(); }} style={{ marginTop: '1rem' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addMargins}</span>
                   <div className={`toggle-switch ${addMargins ? 'active' : ''}`}><div className="toggle-knob"></div></div>
                 </div>
                 <div className="setting-row" style={{ marginTop: '1rem', cursor: 'default' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.pdfQuality}</span>
-                  <select value={quality} onChange={(e) => { setQuality(Number(e.target.value)); setPdfUrl(null); }} className="input-field" style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}>
+                  <select value={quality} onChange={(e) => { setQuality(Number(e.target.value)); clearPdfResult(); }} className="input-field" style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}>
                     <option value={1.0}>{t.qualityHigh}</option>
                     <option value={0.8}>{t.qualityMedium}</option>
                     <option value={0.5}>{t.qualityLow}</option>
@@ -912,7 +938,7 @@ function App() {
                 </div>
                 <div className="setting-input-group" style={{ marginTop: '1rem' }}>
                   <label>{t.watermarkLabel}</label>
-                  <input type="text" value={watermark} onChange={(e) => { setWatermark(e.target.value); setPdfUrl(null); }} placeholder={t.watermarkPlaceholder} className="input-field" maxLength={40} />
+                  <input type="text" value={watermark} onChange={(e) => { setWatermark(e.target.value); clearPdfResult(); }} placeholder={t.watermarkPlaceholder} className="input-field" maxLength={40} />
                 </div>
               </div>
             </div>
@@ -934,19 +960,19 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowClearConfirm(false)}>
           <div className="modal-content" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 style={{ color: 'var(--error-color)' }}>{t.clearAllConfirmTitle}</h3>
+              <h3 style={{ color: 'var(--error-color)' }}>{t.messages.confirmClearTitle}</h3>
               <button className="icon-button" onClick={() => setShowClearConfirm(false)}><X size={20} /></button>
             </div>
             <div style={{ padding: '1.5rem' }}>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>{t.clearAllConfirmDesc}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>{t.messages.confirmClearDesc}</p>
             </div>
             <div className="modal-actions">
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowClearConfirm(false)}>
-                {t.noCancel}
+                {t.common.cancel}
               </button>
               <button className="btn btn-danger" onClick={confirmClearAll}>
                 <Trash2 size={20} />
-                {t.yesClear}
+                {t.actions.clearAll}
               </button>
             </div>
           </div>
@@ -959,7 +985,7 @@ function App() {
             <div className="modal-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 {fileName || getSmartFilename()}.pdf
-                {pdfBlob && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>{t.fileSize} {(pdfBlob.size / (1024 * 1024)).toFixed(2)} MB</span>}
+                {pdfBlob && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>{t.ui.fileSize} {(pdfBlob.size / (1024 * 1024)).toFixed(2)} MB</span>}
               </h3>
               <button className="icon-button" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
             </div>
@@ -968,15 +994,15 @@ function App() {
             </div>
             <div className="modal-actions" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowPreviewModal(false)}>
-                {t.closePreview}
+                {t.actions.close}
               </button>
               <button className="btn" style={{ background: '#0ea5e9', color: 'white' }} onClick={handlePrint}>
                 <Printer size={20} />
-                {t.printPdf || 'Print PDF'}
+                {t.actions.print}
               </button>
               <a href={pdfUrl} download={`${fileName || getSmartFilename()}.pdf`} className="btn btn-success">
                 <Download size={20} />
-                {t.downloadPdf}
+                {t.actions.download}
               </a>
             </div>
           </div>
@@ -986,12 +1012,12 @@ function App() {
       {/* Footer */}
       <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('privacy')}>{t.privacyPolicy}</span>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('terms')}>{t.termsOfUse}</span>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('contact')}>{t.contactUs}</span>
-          <span style={{ cursor: 'pointer', color: 'var(--primary-color)', fontWeight: '500' }} onClick={handleShareApp}>{t.shareApp}</span>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('privacy')}>{t.nav.privacyPolicy}</span>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('terms')}>{t.nav.termsOfUse}</span>
+          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('contact')}>{t.nav.contactUs}</span>
+          <span style={{ cursor: 'pointer', color: 'var(--primary-color)', fontWeight: '500' }} onClick={handleShareApp}>{t.actions.shareApp}</span>
         </div>
-        <p>© {new Date().getFullYear()} {t.title}. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {t.common.title}. All rights reserved.</p>
       </footer>
 
 

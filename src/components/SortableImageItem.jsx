@@ -1,6 +1,6 @@
-import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { translations } from '../translations';
 import { X, RotateCw, Crop } from 'lucide-react';
 
 const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotation, enhanced, scanner }) => {
@@ -12,6 +12,9 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
     transition,
     isDragging,
   } = useSortable({ id });
+
+  // Assuming 'lang' is available from a context or prop, or default to 'en'
+  const t = translations.en; // Fallback, ideally passed as prop or context
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -29,7 +32,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          title="Crop"
+          title={t.cropImage}
         >
           <Crop size={18} />
         </button>
@@ -39,7 +42,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          title="Rotate"
+          title={t.rotateImage}
         >
           <RotateCw size={18} />
         </button>
@@ -49,7 +52,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          title="Delete"
+          title={t.removeFile}
         >
           <X size={18} />
         </button>

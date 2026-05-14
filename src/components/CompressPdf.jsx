@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
 import { jsPDF } from 'jspdf';
@@ -51,7 +51,7 @@ export default function CompressPdf({ setError }) {
       const numPages = pdf.numPages;
 
       if (numPages > 150) {
-        setError(lang === 'ar' ? 'عذراً، لا يمكن ضغط ملف يحتوي على أكثر من 150 صفحة لحماية متصفحك.' : 'Sorry, maximum limit is 150 pages to prevent browser crash.');
+        setError(t.errorMaxPagesCompress);
         setIsProcessing(false);
         return;
       }
@@ -103,7 +103,7 @@ export default function CompressPdf({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(lang === 'ar' ? 'حدث خطأ أثناء ضغط الملف.' : 'Error compressing file.');
+      setError(t.errorCompressingFile);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -113,10 +113,10 @@ export default function CompressPdf({ setError }) {
     <div className="tool-container">
       <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-main)' }}>
-          {lang === 'ar' ? 'ضغط ملف PDF' : 'Compress PDF'}
+          {t.compressTitle}
         </h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-          {lang === 'ar' ? 'قم بتقليل حجم ملف الـ PDF الخاص بك للتمكن من إرساله ومشاركته بسهولة.' : 'Reduce the file size of your PDF easily to share it faster.'}
+          {t.compressSubtitle}
         </p>
 
         <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
@@ -124,9 +124,9 @@ export default function CompressPdf({ setError }) {
           {!pdfFile ? (
             <div className="dropzone-content">
               <UploadCloud size={48} className="upload-icon" />
-              <h3>{lang === 'ar' ? 'اسحب ملف PDF هنا' : 'Drag PDF file here'}</h3>
+              <h3>{t.dragPdfHere}</h3>
               <button className="btn btn-primary" onClick={open}>
-                {lang === 'ar' ? 'اختيار ملف' : 'Select File'}
+                {t.selectFile}
               </button>
             </div>
           ) : (
@@ -143,29 +143,29 @@ export default function CompressPdf({ setError }) {
       {pdfFile && !resultPdfUrl && (
         <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-            <Settings size={20} /> {lang === 'ar' ? 'مستوى الضغط' : 'Compression Level'}
+            <Settings size={20} /> {t.compressionLevel}
           </h3>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
             <label className={`btn ${compressionLevel === 'low' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'low' ? '' : 'var(--glass-bg)' }}>
               <input type="radio" name="compression" value="low" checked={compressionLevel === 'low'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
-              {lang === 'ar' ? 'ضغط خفيف' : 'Low'}
+              {t.compressionLow}
             </label>
             <label className={`btn ${compressionLevel === 'medium' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'medium' ? '' : 'var(--glass-bg)' }}>
               <input type="radio" name="compression" value="medium" checked={compressionLevel === 'medium'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
-              {lang === 'ar' ? 'ضغط متوسط (موصى به)' : 'Medium (Recommended)'}
+              {t.compressionMedium}
             </label>
             <label className={`btn ${compressionLevel === 'high' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'high' ? '' : 'var(--glass-bg)' }}>
               <input type="radio" name="compression" value="high" checked={compressionLevel === 'high'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
-              {lang === 'ar' ? 'ضغط قوي' : 'High'}
+              {t.compressionHigh}
             </label>
           </div>
           
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-            {lang === 'ar' ? 'ملاحظة: عملية الضغط تقوم بتحويل النصوص إلى صور مسطحة، مما قد يؤثر على القدرة على تحديد النصوص.' : 'Note: Compression flattens the PDF into images, which removes text selectability.'}
+            {t.compressionNote}
           </p>
 
           <button className="btn btn-primary generate-btn" onClick={handleCompress} disabled={isProcessing}>
-             {lang === 'ar' ? 'ضغط الملف الآن' : 'Compress PDF Now'}
+             {t.compressNow}
           </button>
         </div>
       )}
@@ -174,27 +174,27 @@ export default function CompressPdf({ setError }) {
         <div className="glass-panel result-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
           <h2 style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
-            {lang === 'ar' ? 'تم ضغط الملف بنجاح!' : 'PDF Compressed Successfully!'}
+            {t.compressSuccess}
           </h2>
           
           <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <div style={{ background: 'var(--glass-bg)', padding: '1rem', borderRadius: '12px', minWidth: '120px' }}>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{lang === 'ar' ? 'الحجم الأصلي' : 'Original Size'}</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{t.originalSize}</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{stats.original} MB</div>
             </div>
             <div style={{ background: 'rgba(56, 161, 105, 0.1)', padding: '1rem', borderRadius: '12px', minWidth: '120px', border: '1px solid var(--success-color)' }}>
-              <div style={{ color: 'var(--success-color)', fontSize: '0.9rem' }}>{lang === 'ar' ? 'الحجم الجديد' : 'New Size'}</div>
+              <div style={{ color: 'var(--success-color)', fontSize: '0.9rem' }}>{t.newSize}</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success-color)' }}>{stats.compressed} MB</div>
             </div>
             <div style={{ background: 'var(--primary-color)', color: 'white', padding: '1rem', borderRadius: '12px', minWidth: '120px' }}>
-              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>{lang === 'ar' ? 'نسبة التوفير' : 'Saved'}</div>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>{t.savedPercentage}</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{stats.saved > 0 ? stats.saved : 0}%</div>
             </div>
           </div>
 
           <a href={resultPdfUrl} download={`compressed-${pdfFile.name}`} className="btn btn-success" style={{ fontSize: '1.2rem', padding: '1rem 2rem' }}>
             <Download size={20} />
-            {lang === 'ar' ? 'تحميل الملف المضغوط' : 'Download Compressed PDF'}
+            {t.downloadCompressedPdf}
           </a>
         </div>
       )}
