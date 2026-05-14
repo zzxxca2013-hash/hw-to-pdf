@@ -64,7 +64,7 @@ useEffect(() => {
   const handleToolChange = (tool) => {
     setActiveTool(tool);
     let path = '/hw-to-pdf/';
-    if (tool === 'merge') path = '/hw-to-pdf/merge/';
+    if (tool === 'merge') path = '/hw-to-pdf/merge-pdf/';
     if (tool === 'split') path = '/hw-to-pdf/split/';
     if (tool === 'pdf2img') path = '/hw-to-pdf/pdf2img/';
     if (tool === 'organize') path = '/hw-to-pdf/organize/';
