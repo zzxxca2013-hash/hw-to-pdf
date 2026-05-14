@@ -1,0 +1,43 @@
+
+> hw-to-pdf@1.0.0 build
+> vite build
+
+vite v8.0.10 building client environment for production...
+[2Ktransforming...✓ 2162 modules transformed.
+rendering chunks...
+✗ Build failed in 857ms
+
+PWA v1.2.0
+mode      generateSW
+precache  6 entries (0.05 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-8c29f6e4.js
+error during build:
+Build failed with 2 errors:
+
+[31m[MISSING_EXPORT] Error:[0m "useTranslations" is not exported by "src/translations.js".
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/components/MergePdf.jsx:5:10 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m5 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0museTranslations[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m.[0m[38;5;249m/[0m[38;5;249mt[0m[38;5;249mr[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m  │[0m          ───────┬───────  
+ [38;5;240m  │[0m                 ╰───────── Missing export
+[38;5;246m───╯[0m
+
+[31m[MISSING_EXPORT] Error:[0m "useTranslations" is not exported by "src/translations.js".
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/components/SplitPdf.jsx:6:10 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m6 │[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0museTranslations[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m.[0m[38;5;249m/[0m[38;5;249mt[0m[38;5;249mr[0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mo[0m[38;5;249mn[0m[38;5;249ms[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m  │[0m          ───────┬───────  
+ [38;5;240m  │[0m                 ╰───────── Missing export
+[38;5;246m───╯[0m
+
+    at aggregateBindingErrorsIntoJsError (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/rolldown/dist/shared/error-DL-e8-oE.mjs:48:18)
+    at unwrapBindingResult (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/rolldown/dist/shared/error-DL-e8-oE.mjs:18:128)
+    at #build (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/rolldown/dist/shared/rolldown-build-DSxL8qiP.mjs:3317:34)
+    at async buildEnvironment (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/vite/dist/node/chunks/node.js:33018:64)
+    at async Object.build (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/vite/dist/node/chunks/node.js:33440:19)
+    at async Object.buildApp (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/vite/dist/node/chunks/node.js:33437:153)
+    at async CAC.<anonymous> (file:///home/adko/%D8%B3%D8%B7%D8%AD%20%D8%A7%D9%84%D9%85%D9%83%D8%AA%D8%A8/%D9%85%D8%AC%D9%84%D9%91%D9%8E%D8%AF%20%D8%AC%D8%AF%D9%8A%D8%AF/node_modules/vite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}

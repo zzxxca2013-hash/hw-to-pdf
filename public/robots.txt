@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zzxxca2013-hash.github.io/hw-to-pdf/sitemap.xml
