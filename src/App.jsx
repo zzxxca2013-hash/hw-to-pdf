@@ -19,6 +19,10 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import './index.css';
 
 function App() {
+
+useEffect(() => {
+  console.log("APP WORKING ✅");
+}, []);
   const [images, setImages] = useState([]);
   const [lang, setLang] = useLocalStorage('hw-pdf-lang', 'ar');
   const [theme, setTheme] = useLocalStorage('hw-pdf-theme', 'light');
