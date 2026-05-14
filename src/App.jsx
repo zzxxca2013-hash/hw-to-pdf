@@ -52,10 +52,10 @@ useEffect(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
       if (path.includes('/merge-pdf')) return 'merge';
-      if (path.includes('/split')) return 'split';
-      if (path.includes('/pdf2img')) return 'pdf2img';
-      if (path.includes('/organize')) return 'organize';
-      if (path.includes('/compress')) return 'compress';
+      if (path.includes('/split-pdf')) return 'split';
+      if (path.includes('/pdf-to-image')) return 'pdf2img';
+      if (path.includes('/organize-pdf')) return 'organize';
+      if (path.includes('/compress-pdf')) return 'compress';
     }
     return 'img2pdf';
   };
@@ -65,10 +65,10 @@ useEffect(() => {
     setActiveTool(tool);
     let path = '/hw-to-pdf/';
     if (tool === 'merge') path = '/hw-to-pdf/merge-pdf/';
-    if (tool === 'split') path = '/hw-to-pdf/split/';
-    if (tool === 'pdf2img') path = '/hw-to-pdf/pdf2img/';
-    if (tool === 'organize') path = '/hw-to-pdf/organize/';
-    if (tool === 'compress') path = '/hw-to-pdf/compress/';
+    if (tool === 'split') path = '/hw-to-pdf/split-pdf/';
+    if (tool === 'pdf2img') path = '/hw-to-pdf/pdf-to-image/';
+    if (tool === 'organize') path = '/hw-to-pdf/organize-pdf/';
+    if (tool === 'compress') path = '/hw-to-pdf/compress-pdf/';
     window.history.pushState({}, '', path);
   };
   const [croppingImageId, setCroppingImageId] = useState(null);
