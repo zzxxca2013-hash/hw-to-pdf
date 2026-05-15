@@ -25,7 +25,7 @@ export default defineConfig({
             return 'vendor-jspdf';
           }
 
-          if (id.includes('pdfjs-dist')) {
+          if (id.includes('pdfjs-dist') || id.includes('pdf-lib')) {
             return 'vendor-pdfjs';
           }
 
