@@ -1,54 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset 
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
   <url>
     <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/"/>
-    <lastmod>2026-05-12</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+
   <url>
-    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/merge/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/merge/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/merge/"/>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/merge-pdf/</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
-    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/split/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/split/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/split/"/>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/split-pdf/</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
-    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/pdf2img/"/>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/compress-pdf/</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
-    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/organize/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/organize/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/organize/"/>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/organize-pdf/</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
   <url>
-    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/compress/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://zzxxca2013-hash.github.io/hw-to-pdf/compress/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://zzxxca2013-hash.github.io/hw-to-pdf/compress/"/>
-    <lastmod>2026-05-12</lastmod>
+    <loc>https://zzxxca2013-hash.github.io/hw-to-pdf/pdf-to-image/</loc>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
 </urlset>

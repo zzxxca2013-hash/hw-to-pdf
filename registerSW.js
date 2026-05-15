@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/hw-to-pdf/sw.js', { scope: '/hw-to-pdf/' })})}

@@ -1,1 +1,0 @@
-var e=`/hw-to-pdf/assets/pdf.worker.min-iDqQPrd3.mjs`;export{e as default};
