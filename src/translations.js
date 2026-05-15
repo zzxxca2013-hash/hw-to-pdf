@@ -284,13 +284,13 @@ export const translations = {
       fileSize: "الحجم:",
       toggleLang: "التبديل للإنجليزية",
       toggleTheme: "تغيير المظهر (فاتح/داكن)",
-    imageCount: (count) => {
-      if (count === 1) return "صورة واحدة";
-      if (count === 2) return "صورتان";
-      if (count >= 3 && count <= 10) return `${count} صور`;
-      return `${count} صورة`;
-    },
-      previewPdf: "معاينة PDF", // Added for consistency
+      imageCount: (count) => {
+        if (count === 1) return "صورة واحدة";
+        if (count === 2) return "صورتان";
+        if (count >= 3 && count <= 10) return `${count} صور`;
+        return `${count} صورة`;
+      },
+      previewPdf: "معاينة PDF",
     },
     nav: {
       privacyPolicy: "سياسة الخصوصية",

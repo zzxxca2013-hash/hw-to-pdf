@@ -20,9 +20,6 @@ import './index.css';
 
 function App() {
 
-useEffect(() => {
-  console.log("APP WORKING ✅");
-}, []);
   const [images, setImages] = useState([]);
   const [lang, setLang] = useLocalStorage('hw-pdf-lang', 'ar');
   const [theme, setTheme] = useLocalStorage('hw-pdf-theme', 'light');
@@ -51,11 +48,11 @@ useEffect(() => {
   const getInitialTool = () => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
-      if (path.includes('/merge-pdf')) return 'merge';
-      if (path.includes('/split-pdf')) return 'split';
-      if (path.includes('/pdf-to-image')) return 'pdf2img';
-      if (path.includes('/organize-pdf')) return 'organize';
-      if (path.includes('/compress-pdf')) return 'compress';
+      if (path.includes('/merge/')) return 'merge';
+      if (path.includes('/split/')) return 'split';
+      if (path.includes('/pdf2img/')) return 'pdf2img';
+      if (path.includes('/organize/')) return 'organize';
+      if (path.includes('/compress/')) return 'compress';
     }
     return 'img2pdf';
   };
@@ -64,11 +61,11 @@ useEffect(() => {
   const handleToolChange = (tool) => {
     setActiveTool(tool);
     const toolPaths = {
-      merge: '/hw-to-pdf/merge-pdf/',
-      split: '/hw-to-pdf/split-pdf/',
-      pdf2img: '/hw-to-pdf/pdf-to-image/',
-      organize: '/hw-to-pdf/organize-pdf/',
-      compress: '/hw-to-pdf/compress-pdf/',
+      merge: '/hw-to-pdf/merge/',
+      split: '/hw-to-pdf/split/',
+      pdf2img: '/hw-to-pdf/pdf2img/',
+      organize: '/hw-to-pdf/organize/',
+      compress: '/hw-to-pdf/compress/',
     };
     const path = toolPaths[tool] || '/hw-to-pdf/';
     window.history.pushState({}, '', path);
@@ -643,7 +640,7 @@ useEffect(() => {
             ].map((tool) => (
               <a 
                 key={tool.id}
-                href={`/hw-to-pdf/${tool.id === 'img2pdf' ? '' : tool.id}`} 
+                href={`/hw-to-pdf/${tool.id === 'img2pdf' ? '' : tool.id + '/'}`} 
                 className={`btn ${activeTool === tool.id ? 'btn-primary' : ''}`} 
                 style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
                 onClick={(e) => { e.preventDefault(); handleToolChange(tool.id); }}
