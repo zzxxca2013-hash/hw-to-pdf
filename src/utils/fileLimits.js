@@ -11,15 +11,24 @@ export const getRuntimeLimits = () => {
   return {
     maxImages: isMobile ? 60 : 100,
     maxImageFileSize: (isMobile ? 12 : 25) * MB,
-    maxImageSide: isMobile ? 5000 : 7000,
+    maxImageSide: isMobile ? 4096 : 6000,
+    maxImagePixels: isMobile ? 16_000_000 : 32_000_000,
+    maxCanvasPixels: isMobile ? 12_000_000 : 24_000_000,
     maxPdfFileSize: (isMobile ? 40 : 90) * MB,
     maxPdfPages: isMobile ? 80 : 150,
-    maxPdfToImagePages: isMobile ? 40 : 100,
-    pdfToImageLargeFilePages: isMobile ? 20 : 50,
+    maxPdfToImagePages: isMobile ? 30 : 80,
+    pdfToImageLargeFilePages: isMobile ? 12 : 35,
   };
 };
 
 export const bytesToMb = (bytes) => (bytes / MB).toFixed(0);
+
+export const pixelsToMegapixels = (pixels) => (pixels / 1_000_000).toFixed(0);
+
+export const getSafeCanvasScale = (width, height, maxPixels) => {
+  const pixels = width * height;
+  return pixels > maxPixels ? Math.sqrt(maxPixels / pixels) : 1;
+};
 
 export const isPdfFile = (file) => (
   file?.type === 'application/pdf' || /\.pdf$/i.test(file?.name || '')

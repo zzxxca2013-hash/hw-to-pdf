@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import ReactCrop, { centerCrop, makeAspectCrop, convertToPixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { X, Check } from 'lucide-react';
+import { useModalFocus } from '../hooks/useModalFocus';
 
 function centerAspectCrop(mediaWidth, mediaHeight, aspect) {
   return centerCrop(
@@ -22,6 +23,7 @@ function centerAspectCrop(mediaWidth, mediaHeight, aspect) {
 const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
   const [crop, setCrop] = useState();
   const imgRef = useRef(null);
+  const modalRef = useModalFocus(true, onCancel);
 
   const onImageLoad = (e) => {
     const { width, height } = e.currentTarget;
@@ -63,12 +65,14 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
     );
 
     const base64Image = canvas.toDataURL('image/jpeg', 1.0);
+    canvas.width = 1;
+    canvas.height = 1;
     onCropComplete(base64Image);
   };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content glass-panel" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
+      <div ref={modalRef} className="modal-content glass-panel" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title" tabIndex={-1}>
         <div className="modal-header">
           <h3 id="crop-dialog-title">{t.cropImage}</h3>
           <button className="icon-button" onClick={onCancel} aria-label={t.cancel}>

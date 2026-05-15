@@ -5,7 +5,7 @@ import JSZip from 'jszip';
 import { UploadCloud, FileImage, Trash2, Check, DownloadCloud } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, getSafeCanvasScale, isPdfFile } from '../utils/fileLimits';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -86,44 +86,46 @@ export default function PdfToImg({ setError }) {
         return;
       }
 
-      const renderScale = numPages > limits.pdfToImageLargeFilePages ? 1.25 : 2.0;
+      const renderScale = numPages > limits.pdfToImageLargeFilePages ? 1.15 : 1.75;
       const zip = new JSZip();
 
       for (let i = 1; i <= numPages; i++) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 75));
-        
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: renderScale });
-        
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        let canvas = null;
 
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport
-        };
-        
-        await page.render(renderContext).promise;
-        
-        // Convert canvas to blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', renderScale < 2 ? 0.88 : 0.95));
-        if (!blob) throw new Error('Canvas export failed');
-        
-        if (extractedImages.length < MAX_PREVIEW_IMAGES) {
-          const url = URL.createObjectURL(blob);
-          extractedImages.push({ id: i, url });
+        try {
+          const requestedViewport = page.getViewport({ scale: renderScale });
+          const safeScale = renderScale * getSafeCanvasScale(requestedViewport.width, requestedViewport.height, limits.maxCanvasPixels);
+          const viewport = page.getViewport({ scale: safeScale });
+
+          canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d', { alpha: false });
+          canvas.height = Math.floor(viewport.height);
+          canvas.width = Math.floor(viewport.width);
+
+          await page.render({ canvasContext: context, viewport }).promise;
+
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', safeScale < 1.5 ? 0.86 : 0.92));
+          if (!blob) throw new Error('Canvas export failed');
+
+          if (extractedImages.length < MAX_PREVIEW_IMAGES) {
+            const url = URL.createObjectURL(blob);
+            extractedImages.push({ id: i, url });
+          }
+          zip.file(`page-${i}.jpg`, blob);
+        } finally {
+          if (canvas) {
+            canvas.width = 1;
+            canvas.height = 1;
+          }
+          page.cleanup();
         }
-        zip.file(`page-${i}.jpg`, blob);
-        canvas.width = 1;
-        canvas.height = 1;
-        page.cleanup();
       }
 
       setProgress(85);
       
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipBlob = await zip.generateAsync({ type: 'blob', streamFiles: true });
       const zipUrl = URL.createObjectURL(zipBlob);
       setResultZipUrl(prev => {
         if (prev) URL.revokeObjectURL(prev);

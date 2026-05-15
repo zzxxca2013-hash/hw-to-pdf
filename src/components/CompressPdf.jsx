@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf';
 import { UploadCloud, Check, Download, FileArchive, Settings } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, getSafeCanvasScale, isPdfFile } from '../utils/fileLimits';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -87,22 +87,36 @@ export default function CompressPdf({ setError }) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 85));
         
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
-        
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        let canvas = null;
 
-        await page.render({ canvasContext: context, viewport: viewport }).promise;
-        
-        const imgData = canvas.toDataURL('image/jpeg', quality);
-        
-        const pdfWidth = pdfDoc.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdfDoc.addPage([pdfWidth, Math.max(pdfHeight, pdfDoc.internal.pageSize.getHeight())]);
-        pdfDoc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        try {
+          const requestedViewport = page.getViewport({ scale });
+          const safeScale = scale * getSafeCanvasScale(requestedViewport.width, requestedViewport.height, limits.maxCanvasPixels);
+          const viewport = page.getViewport({ scale: safeScale });
+
+          canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d', { alpha: false });
+          canvas.height = Math.floor(viewport.height);
+          canvas.width = Math.floor(viewport.width);
+
+          await page.render({ canvasContext: context, viewport }).promise;
+
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+          if (!blob) throw new Error('Canvas export failed');
+          const imageBytes = new Uint8Array(await blob.arrayBuffer());
+
+          const pdfWidth = pdfDoc.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+          pdfDoc.addPage([pdfWidth, Math.max(pdfHeight, pdfDoc.internal.pageSize.getHeight())]);
+          pdfDoc.addImage(imageBytes, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        } finally {
+          if (canvas) {
+            canvas.width = 1;
+            canvas.height = 1;
+          }
+          page.cleanup();
+        }
       }
 
       setProgress(95);

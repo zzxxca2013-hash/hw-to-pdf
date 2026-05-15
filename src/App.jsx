@@ -5,7 +5,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStr
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
-import { bytesToMb, getRuntimeLimits, isAcceptedImageFile } from './utils/fileLimits';
+import { bytesToMb, getRuntimeLimits, isAcceptedImageFile, pixelsToMegapixels } from './utils/fileLimits';
 import SortableImageItem from './components/SortableImageItem';
 const ImageCropper = lazy(() => import('./components/ImageCropper'));
 const MergePdf = lazy(() => import('./components/MergePdf'));
@@ -14,7 +14,18 @@ const PdfToImg = lazy(() => import('./components/PdfToImg'));
 const OrganizePdf = lazy(() => import('./components/OrganizePdf'));
 const CompressPdf = lazy(() => import('./components/CompressPdf'));
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useModalFocus } from './hooks/useModalFocus';
 import './index.css';
+
+const SITE_URL = 'https://zzxxca2013-hash.github.io/hw-to-pdf/';
+const TOOL_PATHS = {
+  img2pdf: '',
+  merge: 'merge/',
+  split: 'split/',
+  pdf2img: 'pdf2img/',
+  organize: 'organize/',
+  compress: 'compress/',
+};
 
 function App() {
 
@@ -69,6 +80,9 @@ function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [hasVisited, setHasVisited] = useLocalStorage('hw-pdf-visited', false);
   const iframeRef = useRef(null);
+  const settingsModalRef = useModalFocus(showSettingsModal, () => setShowSettingsModal(false));
+  const clearModalRef = useModalFocus(showClearConfirm, () => setShowClearConfirm(false));
+  const previewModalRef = useModalFocus(showPreviewModal, () => setShowPreviewModal(false));
 
   const t = translations[lang];
   const draftSuccessMessageRef = useRef(t.messages.success);
@@ -106,6 +120,20 @@ function App() {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
   }, [lang]);
+
+  useEffect(() => {
+    const canonicalUrl = `${SITE_URL}${TOOL_PATHS[activeTool] || ''}`;
+    const title = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
+    const description = activeTool === 'img2pdf' ? t.common.subtitle : t.tools[activeTool]?.subtitle;
+
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonicalUrl);
+    document.querySelector('meta[name="twitter:url"]')?.setAttribute('content', canonicalUrl);
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+    document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+    document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
+  }, [activeTool, t]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -261,14 +289,25 @@ function App() {
 
     for (const file of files) {
       if (file.size > limits.maxImageFileSize) {
-        setError(t.errorImageTooLarge.replace('{max}', bytesToMb(limits.maxImageFileSize)).replace('{side}', limits.maxImageSide));
+        setError(
+          t.errorImageTooLarge
+            .replace('{max}', bytesToMb(limits.maxImageFileSize))
+            .replace('{side}', limits.maxImageSide)
+            .replace('{pixels}', pixelsToMegapixels(limits.maxImagePixels))
+        );
         return;
       }
 
       try {
         const { width, height } = await getImageSize(file);
-        if (Math.max(width, height) > limits.maxImageSide) {
-          setError(t.errorImageTooLarge.replace('{max}', bytesToMb(limits.maxImageFileSize)).replace('{side}', limits.maxImageSide));
+        const totalPixels = width * height;
+        if (Math.max(width, height) > limits.maxImageSide || totalPixels > limits.maxImagePixels) {
+          setError(
+            t.errorImageTooLarge
+              .replace('{max}', bytesToMb(limits.maxImageFileSize))
+              .replace('{side}', limits.maxImageSide)
+              .replace('{pixels}', pixelsToMegapixels(limits.maxImagePixels))
+          );
           return;
         }
       } catch {
@@ -947,7 +986,7 @@ function App() {
 
       {showSettingsModal && (
         <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
-          <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title" onClick={e => e.stopPropagation()}>
+          <div ref={settingsModalRef} className="modal-content" role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title" tabIndex={-1} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 id="settings-dialog-title">{t.settingsTitle}</h3>
               <button className="icon-button" onClick={() => setShowSettingsModal(false)} aria-label={t.actions.close}><X size={20} /></button>
@@ -1000,7 +1039,7 @@ function App() {
 
       {showClearConfirm && (
         <div className="modal-overlay" onClick={() => setShowClearConfirm(false)}>
-          <div className="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="clear-dialog-title" aria-describedby="clear-dialog-desc" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+          <div ref={clearModalRef} className="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="clear-dialog-title" aria-describedby="clear-dialog-desc" tabIndex={-1} style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 id="clear-dialog-title" style={{ color: 'var(--error-color)' }}>{t.messages.confirmClearTitle}</h3>
               <button className="icon-button" onClick={() => setShowClearConfirm(false)} aria-label={t.actions.close}><X size={20} /></button>
@@ -1023,7 +1062,7 @@ function App() {
 
       {showPreviewModal && pdfUrl && (
         <div className="modal-overlay" onClick={() => setShowPreviewModal(false)}>
-          <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
+          <div ref={previewModalRef} className="modal-content" role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" tabIndex={-1} style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 id="preview-dialog-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 {fileName || getSmartFilename()}.pdf

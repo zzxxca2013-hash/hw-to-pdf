@@ -655,6 +655,8 @@ body::before {
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modal-content {
@@ -668,6 +670,11 @@ body::before {
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.3);
   animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.modal-content > div:not(.modal-header):not(.modal-actions) {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 @keyframes modalFadeIn {
@@ -717,6 +724,7 @@ body::before {
   align-items: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -733,6 +741,21 @@ body::before {
   justify-content: center;
   align-items: center;
   background-color: rgba(0,0,0,0.05);
+}
+
+.modal-actions {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0.75rem;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 1.5rem);
+  }
 }
 
 .modal-actions {
