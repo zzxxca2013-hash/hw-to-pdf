@@ -4,6 +4,45 @@ import { PDFDocument } from 'pdf-lib';
 import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
+
+const SortablePdfItem = ({ pdf, index, onRemove, t }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pdf.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 999 : 'auto',
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  };
+
+  return (
+    <div ref={setNodeRef} className="image-card" style={style} {...attributes} {...listeners}>
+      <div className="card-number">{index + 1}</div>
+      <FileText size={40} style={{ color: 'var(--primary-color)', marginBottom: '0.5rem' }} />
+      <span style={{ fontSize: '0.8rem', textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+        {pdf.name}
+      </span>
+      <div className="card-actions">
+        <button
+          className="icon-button danger"
+          onClick={(e) => { e.stopPropagation(); onRemove(pdf.id); }}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label={t.removeFile}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function MergePdf({ setError }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
@@ -12,6 +51,10 @@ export default function MergePdf({ setError }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     return () => {
@@ -23,6 +66,20 @@ export default function MergePdf({ setError }) {
     if (acceptedFiles.length === 0) return; // Prevent processing if no files dropped
     setProgress(20);
     try {
+      const limits = getRuntimeLimits();
+      const invalidFile = acceptedFiles.find(file => !isPdfFile(file));
+      const tooLargeFile = acceptedFiles.find(file => file.size > limits.maxPdfFileSize);
+
+      if (invalidFile) {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
+
+      if (tooLargeFile) {
+        setError(t.errorFileTooLarge.replace('{max}', bytesToMb(limits.maxPdfFileSize)));
+        return;
+      }
+
       const newPdfs = acceptedFiles.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
         file,
@@ -36,16 +93,28 @@ export default function MergePdf({ setError }) {
       setIsProcessing(false);
       setProgress(0);
     }
-  }, [setError, t.errorProcessing]);
+  }, [setError, t.errorFileTooLarge, t.errorProcessing, t.errorUnsupportedFile]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: { 'application/pdf': ['.pdf'] },
     noClick: pdfs.length > 0
   });
 
   const removePdf = (id) => {
     setPdfs(prev => prev.filter(p => p.id !== id));
+    setResultUrl(null);
+  };
+
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+
+    setPdfs((items) => {
+      const oldIndex = items.findIndex(i => i.id === active.id);
+      const newIndex = items.findIndex(i => i.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
     setResultUrl(null);
   };
 
@@ -63,6 +132,12 @@ export default function MergePdf({ setError }) {
         const file = pdfs[i].file;
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await PDFDocument.load(arrayBuffer);
+        const limits = getRuntimeLimits();
+        if (pdf.getPageCount() > limits.maxPdfPages) {
+          setError(t.errorMaxPages);
+          setIsProcessing(false);
+          return;
+        }
         const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
         copiedPages.forEach((page) => mergedPdf.addPage(page));
         setProgress(10 + Math.round(((i + 1) / pdfs.length) * 60));
@@ -83,7 +158,7 @@ export default function MergePdf({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(t.errorProcessing || "Error merging files");
+      setError(getPdfErrorMessage(error, t) || t.errorProcessing || "Error merging files");
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -110,22 +185,15 @@ export default function MergePdf({ setError }) {
               </button>
             </div>
           ) : (
-            <div className="image-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', padding: '1rem' }}>
-              {pdfs.map((pdf, index) => (
-                <div key={pdf.id} className="image-card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div className="card-number">{index + 1}</div>
-                  <FileText size={40} style={{ color: 'var(--primary-color)', marginBottom: '0.5rem' }} />
-                  <span style={{ fontSize: '0.8rem', textAlign: 'center', wordBreak: 'break-all', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {pdf.name}
-                  </span>
-                  <div className="card-actions">
-                    <button className="icon-button danger" onClick={(e) => { e.stopPropagation(); removePdf(pdf.id); }} aria-label={t.removeFile}>
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={pdfs.map(pdf => pdf.id)} strategy={rectSortingStrategy}>
+                <div className="images-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', padding: '1rem', marginBottom: 0 }}>
+                  {pdfs.map((pdf, index) => (
+                    <SortablePdfItem key={pdf.id} pdf={pdf} index={index} onRemove={removePdf} t={t} />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           )}
         </div>
 

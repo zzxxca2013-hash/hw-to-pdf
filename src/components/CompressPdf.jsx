@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import { UploadCloud, Check, Download, FileArchive, Settings } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -27,14 +28,28 @@ export default function CompressPdf({ setError }) {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
-      setPdfFile(acceptedFiles[0]);
+      const file = acceptedFiles[0];
+      const limits = getRuntimeLimits();
+
+      if (!isPdfFile(file)) {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
+
+      if (file.size > limits.maxPdfFileSize) {
+        setError(t.errorFileTooLarge.replace('{max}', bytesToMb(limits.maxPdfFileSize)));
+        return;
+      }
+
+      setPdfFile(file);
       setResultPdfUrl(null);
       setStats(null);
     }
-  }, []);
+  }, [setError, t.errorFileTooLarge, t.errorUnsupportedFile]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
     noClick: !!pdfFile
@@ -44,13 +59,17 @@ export default function CompressPdf({ setError }) {
     if (!pdfFile) return;
     setIsProcessing(true);
     setProgress(5);
+    let loadingTask = null;
+    let pdf = null;
     
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      pdf = await loadingTask.promise;
       const numPages = pdf.numPages;
+      const limits = getRuntimeLimits();
 
-      if (numPages > 150) {
+      if (numPages > limits.maxPdfPages) {
         setError(t.errorMaxPagesCompress);
         setIsProcessing(false);
         return;
@@ -103,8 +122,10 @@ export default function CompressPdf({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(t.errorCompressingFile);
+      setError(getPdfErrorMessage(error, t) || t.errorCompressingFile);
     } finally {
+      await pdf?.destroy?.();
+      if (!pdf) await loadingTask?.destroy?.();
       setTimeout(() => setIsProcessing(false), 500);
     }
   };
@@ -142,6 +163,9 @@ export default function CompressPdf({ setError }) {
 
       {pdfFile && !resultPdfUrl && (
         <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
+          <div style={{ textAlign: 'start', color: 'var(--text-muted)', background: 'rgba(99, 102, 241, 0.08)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            {t.compressRasterWarning}
+          </div>
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             <Settings size={20} /> {t.compressionLevel}
           </h3>

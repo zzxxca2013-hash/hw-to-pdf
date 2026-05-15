@@ -5,6 +5,38 @@ import JSZip from 'jszip';
 import { UploadCloud, FileText, Trash2, Check } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
+
+const parsePageRanges = (value, pageCount) => {
+  if (!value.trim()) return { pages: Array.from({ length: pageCount }, (_, index) => index) };
+
+  const selected = [];
+  const seen = new Set();
+  const parts = value.split(',').map(part => part.trim()).filter(Boolean);
+
+  if (parts.length === 0) return { error: 'invalid' };
+
+  for (const part of parts) {
+    const match = part.match(/^(\d+)(?:\s*-\s*(\d+))?$/);
+    if (!match) return { error: 'invalid' };
+
+    const start = Number(match[1]);
+    const end = Number(match[2] || match[1]);
+
+    if (start < 1 || end < start) return { error: 'invalid' };
+    if (end > pageCount) return { error: 'range' };
+
+    for (let page = start; page <= end; page++) {
+      const index = page - 1;
+      if (!seen.has(index)) {
+        seen.add(index);
+        selected.push(index);
+      }
+    }
+  }
+
+  return { pages: selected };
+};
 
 export default function SplitPdf({ setError }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
@@ -13,6 +45,7 @@ export default function SplitPdf({ setError }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState(null);
+  const [pageRange, setPageRange] = useState('');
 
   useEffect(() => {
     return () => {
@@ -22,13 +55,28 @@ export default function SplitPdf({ setError }) {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
-      setPdfFile(acceptedFiles[0]);
+      const file = acceptedFiles[0];
+      const limits = getRuntimeLimits();
+
+      if (!isPdfFile(file)) {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
+
+      if (file.size > limits.maxPdfFileSize) {
+        setError(t.errorFileTooLarge.replace('{max}', bytesToMb(limits.maxPdfFileSize)));
+        return;
+      }
+
+      setPdfFile(file);
       setResultUrl(null);
+      setPageRange('');
     }
-  }, []);
+  }, [setError, t.errorFileTooLarge, t.errorUnsupportedFile]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
     noClick: !!pdfFile
@@ -42,22 +90,31 @@ export default function SplitPdf({ setError }) {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const pdf = await PDFDocument.load(arrayBuffer);
       const pageCount = pdf.getPageCount();
+      const limits = getRuntimeLimits();
 
-      if (pageCount > 150) {
+      if (pageCount > limits.maxPdfPages) {
         setError(t.errorMaxPages);
+        setIsProcessing(false);
+        return;
+      }
+
+      const { pages: selectedPages, error: rangeError } = parsePageRanges(pageRange, pageCount);
+      if (rangeError || !selectedPages || selectedPages.length === 0) {
+        setError(rangeError === 'range' ? t.errorPageOutOfRange : t.errorInvalidPageRange);
         setIsProcessing(false);
         return;
       }
       
       const zip = new JSZip();
       
-      for (let i = 0; i < pageCount; i++) {
+      for (let i = 0; i < selectedPages.length; i++) {
+        const pageIndex = selectedPages[i];
         const newPdf = await PDFDocument.create();
-        const [copiedPage] = await newPdf.copyPages(pdf, [i]);
+        const [copiedPage] = await newPdf.copyPages(pdf, [pageIndex]);
         newPdf.addPage(copiedPage);
         const pdfBytes = await newPdf.save();
-        zip.file(`page-${i + 1}.pdf`, pdfBytes);
-        setProgress(10 + Math.round(((i + 1) / pageCount) * 70));
+        zip.file(`page-${pageIndex + 1}.pdf`, pdfBytes);
+        setProgress(10 + Math.round(((i + 1) / selectedPages.length) * 70));
       }
 
       setProgress(85);
@@ -74,7 +131,7 @@ export default function SplitPdf({ setError }) {
 
     } catch (error) {
       console.error(error);
-      setError(t.errorSplit);
+      setError(getPdfErrorMessage(error, t) || t.errorSplit);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -115,7 +172,18 @@ export default function SplitPdf({ setError }) {
       </div>
 
       {pdfFile && !resultUrl && (
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="glass-panel" style={{ textAlign: 'center', marginBottom: '2rem', padding: '1.5rem' }}>
+          <div className="setting-input-group" style={{ maxWidth: '420px', margin: '0 auto 1.25rem', textAlign: 'start' }}>
+            <label htmlFor="splitPageRange">{t.pageRangeLabel}</label>
+            <input
+              id="splitPageRange"
+              className="input-field"
+              value={pageRange}
+              onChange={(e) => setPageRange(e.target.value)}
+              placeholder={t.pageRangePlaceholder}
+            />
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t.pageRangeHelp}</span>
+          </div>
           <button className="btn btn-primary generate-btn" onClick={handleSplit} disabled={isProcessing}>
              {t.splitNow}
           </button>

@@ -18,7 +18,7 @@ export const translations = {
         seoText: "Easily combine multiple PDF files into one single document. Our free PDF merger tool runs entirely offline in your browser, guaranteeing absolute privacy.",
         faq: [
           { q: "How do I merge PDF files offline?", a: "Upload your PDFs, drag to reorder them, and click 'Merge PDFs'. It runs directly in your browser without uploading to any server." },
-          { q: "Is the PDF merging tool free?", a: "Yes, it is 100% free with no limits." },
+          { q: "Is the PDF merging tool free?", a: "Yes, it is free. Very large files are limited to keep your browser stable." },
           { q: "Can I control the order before merging?", a: "Yes. Add the PDFs in the order you want, remove any unwanted file, then generate one combined document." },
           { q: "Will merging change the original PDF files?", a: "No. The tool creates a new merged PDF and keeps your original files unchanged on your device." }
         ]
@@ -27,7 +27,7 @@ export const translations = {
         title: "Split PDF Files",
         subtitle: "Extract pages from your PDF quickly and offline",
         pages: "Split PDF Pages",
-        desc: "Upload a PDF to extract each page as a separate file, downloaded as a ZIP.",
+        desc: "Upload a PDF, choose pages like 1-5, 8, and download the selected pages as separate PDF files in a ZIP.",
         seoTitle: "Split PDF Files Instantly",
         seoText: "Extract specific pages or separate a large PDF document into smaller pieces. A secure, fast, and local PDF splitting tool.",
         faq: [
@@ -65,10 +65,10 @@ export const translations = {
         title: "Compress PDF",
         subtitle: "Reduce PDF file size for easy sharing",
         seoTitle: "Compress PDF File Size",
-        seoText: "Reduce the file size of your PDF documents instantly without losing quality. Ideal for email attachments and fast sharing.",
+        seoText: "Reduce the file size of your PDF documents in your browser by recreating pages as images. This can make many scanned or image-heavy PDFs smaller for email and sharing.",
         faq: [
           { q: "How to reduce PDF file size?", a: "Upload your PDF to our compressor, select the compression level, and we will reduce the file size securely within your browser." },
-          { q: "Does compressing a PDF affect its quality?", a: "We use smart compression that reduces size while maintaining readable quality, though text may become flattened images." },
+          { q: "Does compressing a PDF affect its quality?", a: "The compressor recreates PDF pages as images. This can reduce file size, but searchable text, links, and document accessibility may be flattened." },
           { q: "Which compression level should I choose?", a: "Use low compression for clearer pages, medium for everyday sharing, and high when the smallest file size matters most." },
           { q: "Can I see how much space was saved?", a: "Yes. After compression, the tool shows the original size, new size, and saved percentage." }
         ]
@@ -76,7 +76,7 @@ export const translations = {
     },
     upload: {
       placeholder: "Drag & drop images here, or click to select files",
-      help: "Supports JPG, PNG",
+      help: "Supports JPG, PNG, WebP",
       addMore: "Add More",
       maxError: "Sorry, the maximum limit is 100 images per PDF.",
       dragPdf: "Drag PDF file here",
@@ -134,6 +134,19 @@ export const translations = {
       finalizingPdf: "Finalizing PDF...",
       shareNotSupported: "Sharing is not supported on this browser. Please download the PDF.",
       copyLinkToShare: "Copy this link to share: ",
+      errorFileTooLarge: "This file is too large for safe browser processing. Maximum size is {max} MB.",
+      errorUnsupportedFile: "Unsupported file type. Please choose a valid PDF or supported image file.",
+      errorCorruptFile: "This file appears to be damaged or unreadable. Please try another file.",
+      errorEncryptedPdf: "Encrypted or password-protected PDFs are not supported.",
+      errorImageTooLarge: "One or more images are too large. Maximum image size is {max} MB and maximum side is {side}px.",
+      errorMaxImagesDynamic: "Too many images for this device. Maximum is {max} images.",
+      pageRangeLabel: "Pages to extract",
+      pageRangePlaceholder: "Example: 1-5, 8",
+      pageRangeHelp: "Leave empty to split all pages into separate PDF files.",
+      errorInvalidPageRange: "Please enter valid page numbers or ranges, for example: 1-5, 8.",
+      errorPageOutOfRange: "One or more selected pages are outside this PDF page count.",
+      compressRasterWarning: "This compression recreates pages as images. Searchable text, links, and accessibility tags may be lost, and some PDFs may not become smaller.",
+      pdfSafetyNote: "Large PDFs are limited to protect your browser memory, especially on mobile devices.",
     },
     ui: {
       offline: "Offline Mode",
@@ -182,7 +195,7 @@ export const translations = {
         seoText: "قم بدمج عدة ملفات PDF في مستند واحد بسهولة. أداة دمج الـ PDF الخاصة بنا تعمل بالكامل بدون إنترنت داخل متصفحك، مما يضمن خصوصيتك المطلقة.",
         faq: [
           { q: "كيف أقوم بدمج ملفات PDF بدون إنترنت؟", a: "قم برفع ملفاتك، رتبها بالسحب والإفلات، واضغط 'دمج'. العملية تتم بالكامل على جهازك دون رفعها لأي سيرفر." },
-          { q: "هل الأداة مجانية بالكامل؟", a: "نعم، الأداة مجانية 100% وبدون أي قيود أو علامات مائية." },
+          { q: "هل الأداة مجانية بالكامل؟", a: "نعم، الأداة مجانية، لكن الملفات الضخمة جدًا لها حدود لحماية استقرار المتصفح." },
           { q: "هل يمكنني التحكم بترتيب الملفات قبل الدمج؟", a: "نعم، أضف ملفات PDF بالترتيب المناسب، واحذف أي ملف غير مطلوب، ثم أنشئ ملفاً واحداً مدمجاً." },
           { q: "هل يتم تعديل الملفات الأصلية؟", a: "لا، تبقى ملفاتك الأصلية كما هي على جهازك، ويتم إنشاء ملف PDF جديد للتحميل." }
         ]
@@ -191,7 +204,7 @@ export const translations = {
         title: "تقسيم وفصل PDF",
         subtitle: "استخرج صفحات محددة من ملف الـ PDF الخاص بك بسرعة",
         pages: "فصل صفحات PDF",
-        desc: "قم برفع ملف PDF لاستخراج كل صفحة كملف مستقل وتحميلها جميعاً في ملف مضغوط (ZIP).",
+        desc: "ارفع ملف PDF واكتب الصفحات المطلوبة مثل 1-5, 8 لتحميل الصفحات المحددة كملفات PDF منفصلة داخل ملف ZIP.",
         seoTitle: "تقسيم وفصل ملفات PDF بسرعة",
         seoText: "استخرج صفحات معينة أو قم بتجزئة ملف PDF كبير إلى أجزاء أصغر. أداة آمنة وسريعة وتعمل محلياً.",
         faq: [
@@ -229,10 +242,10 @@ export const translations = {
         title: "ضغط وتصغير PDF",
         subtitle: "قم بتقليل حجم ملف الـ PDF للتمكن من إرساله ومشاركته بسهولة",
         seoTitle: "تصغير وضغط حجم ملف PDF مجاناً",
-        seoText: "قم بتقليل حجم ملفات الـ PDF لتسهيل إرسالها عبر الواتساب أو البريد الإلكتروني. عملية ضغط سريعة وآمنة ومجانية بالكامل.",
+        seoText: "قم بتقليل حجم ملفات الـ PDF داخل المتصفح عبر إعادة إنشاء الصفحات كصور. هذا مفيد غالباً للملفات الممسوحة ضوئياً أو كثيرة الصور لتسهيل إرسالها ومشاركتها.",
         faq: [
           { q: "كيف أقوم بتصغير حجم ملف PDF؟", a: "اسحب الملف وضعه في أداة الضغط، اختر مستوى الضغط المناسب، وسيتم تقليص حجم الملف فوراً داخل متصفحك." },
-          { q: "هل يؤثر الضغط على جودة الملف؟", a: "نستخدم خوارزمية ضغط ذكية تحافظ على الدقة، ولكن قد يتم تحويل النصوص إلى صور مسطحة مما يقلل الحجم بشكل كبير." },
+          { q: "هل يؤثر الضغط على جودة الملف؟", a: "تعيد الأداة إنشاء صفحات PDF كصور. قد يقل الحجم، لكن النصوص القابلة للبحث والروابط وخصائص الوصول قد تتحول إلى صور مسطحة." },
           { q: "أي مستوى ضغط أختار؟", a: "اختر الضغط المنخفض للحفاظ على وضوح أعلى، والمتوسط للاستخدام اليومي، والعالي عندما يكون أصغر حجم هو الأهم." },
           { q: "هل تظهر نسبة التوفير بعد الضغط؟", a: "نعم، بعد انتهاء الضغط ستظهر لك معلومات الحجم الأصلي والحجم الجديد ونسبة التوفير." }
         ]
@@ -240,7 +253,7 @@ export const translations = {
     },
     upload: {
       placeholder: "اسحب وأفلت الصور هنا، أو انقر لاختيار الملفات",
-      help: "يدعم JPG, PNG",
+      help: "يدعم JPG, PNG, WebP",
       addMore: "إضافة صور",
       maxError: "عذراً، الحد الأقصى هو 100 صورة للملف الواحد.",
       dragPdf: "اسحب ملف PDF هنا",
@@ -298,6 +311,19 @@ export const translations = {
       finalizingPdf: "جاري إنهاء ملف PDF...",
       shareNotSupported: "المشاركة غير مدعومة في هذا المتصفح. يرجى تحميل ملف PDF.",
       copyLinkToShare: "انسخ هذا الرابط للمشاركة: ",
+      errorFileTooLarge: "هذا الملف كبير جدًا للمعالجة الآمنة داخل المتصفح. الحد الأقصى {max} MB.",
+      errorUnsupportedFile: "نوع الملف غير مدعوم. يرجى اختيار ملف PDF صحيح أو صورة مدعومة.",
+      errorCorruptFile: "يبدو أن الملف تالف أو غير قابل للقراءة. جرّب ملفًا آخر.",
+      errorEncryptedPdf: "ملفات PDF المشفرة أو المحمية بكلمة مرور غير مدعومة.",
+      errorImageTooLarge: "صورة واحدة أو أكثر كبيرة جدًا. الحد الأقصى لحجم الصورة {max} MB وأكبر ضلع {side}px.",
+      errorMaxImagesDynamic: "عدد الصور كبير جدًا لهذا الجهاز. الحد الأقصى {max} صورة.",
+      pageRangeLabel: "الصفحات المطلوب استخراجها",
+      pageRangePlaceholder: "مثال: 1-5, 8",
+      pageRangeHelp: "اتركه فارغًا لفصل كل الصفحات كملفات PDF منفصلة.",
+      errorInvalidPageRange: "يرجى إدخال أرقام صفحات أو نطاقات صحيحة، مثل: 1-5, 8.",
+      errorPageOutOfRange: "توجد صفحات محددة خارج عدد صفحات هذا الملف.",
+      compressRasterWarning: "يعتمد هذا الضغط على إعادة إنشاء الصفحات كصور. قد تفقد النصوص القابلة للبحث والروابط وخصائص الوصول، وقد لا يقل حجم بعض الملفات.",
+      pdfSafetyNote: "يتم تقييد ملفات PDF الكبيرة لحماية ذاكرة المتصفح، خصوصًا على الجوال.",
     },
     ui: {
       offline: "يعمل بدون إنترنت",
@@ -370,6 +396,19 @@ const compatibilityLabels = {
     downloadCompressedPdf: "Download Compressed PDF",
     errorMaxPagesCompress: "Sorry, maximum limit is 150 pages to prevent browser crash.",
     errorCompressingFile: "An error occurred while compressing the file.",
+    errorFileTooLarge: translations.en.messages.errorFileTooLarge,
+    errorUnsupportedFile: translations.en.messages.errorUnsupportedFile,
+    errorCorruptFile: translations.en.messages.errorCorruptFile,
+    errorEncryptedPdf: translations.en.messages.errorEncryptedPdf,
+    errorImageTooLarge: translations.en.messages.errorImageTooLarge,
+    errorMaxImagesDynamic: translations.en.messages.errorMaxImagesDynamic,
+    pageRangeLabel: translations.en.messages.pageRangeLabel,
+    pageRangePlaceholder: translations.en.messages.pageRangePlaceholder,
+    pageRangeHelp: translations.en.messages.pageRangeHelp,
+    errorInvalidPageRange: translations.en.messages.errorInvalidPageRange,
+    errorPageOutOfRange: translations.en.messages.errorPageOutOfRange,
+    compressRasterWarning: translations.en.messages.compressRasterWarning,
+    pdfSafetyNote: translations.en.messages.pdfSafetyNote,
   },
   ar: {
     selectFiles: "اختيار الملفات",
@@ -404,6 +443,19 @@ const compatibilityLabels = {
     downloadCompressedPdf: "تحميل ملف PDF المضغوط",
     errorMaxPagesCompress: "عذراً، الحد الأقصى هو 150 صفحة لحماية المتصفح.",
     errorCompressingFile: "حدث خطأ أثناء ضغط الملف.",
+    errorFileTooLarge: translations.ar.messages.errorFileTooLarge,
+    errorUnsupportedFile: translations.ar.messages.errorUnsupportedFile,
+    errorCorruptFile: translations.ar.messages.errorCorruptFile,
+    errorEncryptedPdf: translations.ar.messages.errorEncryptedPdf,
+    errorImageTooLarge: translations.ar.messages.errorImageTooLarge,
+    errorMaxImagesDynamic: translations.ar.messages.errorMaxImagesDynamic,
+    pageRangeLabel: translations.ar.messages.pageRangeLabel,
+    pageRangePlaceholder: translations.ar.messages.pageRangePlaceholder,
+    pageRangeHelp: translations.ar.messages.pageRangeHelp,
+    errorInvalidPageRange: translations.ar.messages.errorInvalidPageRange,
+    errorPageOutOfRange: translations.ar.messages.errorPageOutOfRange,
+    compressRasterWarning: translations.ar.messages.compressRasterWarning,
+    pdfSafetyNote: translations.ar.messages.pdfSafetyNote,
   },
 };
 

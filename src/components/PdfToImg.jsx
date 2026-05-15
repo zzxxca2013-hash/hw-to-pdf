@@ -5,11 +5,14 @@ import JSZip from 'jszip';
 import { UploadCloud, FileImage, Trash2, Check, DownloadCloud } from 'lucide-react';
 import { translations } from '../translations';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
+const MAX_PREVIEW_IMAGES = 24;
 
 export default function PdfToImg({ setError }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
@@ -34,14 +37,28 @@ export default function PdfToImg({ setError }) {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
-      setPdfFile(acceptedFiles[0]);
+      const file = acceptedFiles[0];
+      const limits = getRuntimeLimits();
+
+      if (!isPdfFile(file)) {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
+
+      if (file.size > limits.maxPdfFileSize) {
+        setError(t.errorFileTooLarge.replace('{max}', bytesToMb(limits.maxPdfFileSize)));
+        return;
+      }
+
+      setPdfFile(file);
       setImages([]);
       setResultZipUrl(null);
     }
-  }, []);
+  }, [setError, t.errorFileTooLarge, t.errorUnsupportedFile]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
     noClick: !!pdfFile
@@ -53,18 +70,30 @@ export default function PdfToImg({ setError }) {
     setProgress(5);
     setImages([]);
     let extractedImages = [];
+    let loadingTask = null;
+    let pdf = null;
     
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      pdf = await loadingTask.promise;
       const numPages = pdf.numPages;
+      const limits = getRuntimeLimits();
+
+      if (numPages > limits.maxPdfToImagePages) {
+        setError(t.errorMaxPages);
+        setIsProcessing(false);
+        return;
+      }
+
+      const renderScale = numPages > limits.pdfToImageLargeFilePages ? 1.25 : 2.0;
       const zip = new JSZip();
 
       for (let i = 1; i <= numPages; i++) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 75));
         
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better quality
+        const viewport = page.getViewport({ scale: renderScale });
         
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -79,15 +108,19 @@ export default function PdfToImg({ setError }) {
         await page.render(renderContext).promise;
         
         // Convert canvas to blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-        const url = URL.createObjectURL(blob);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', renderScale < 2 ? 0.88 : 0.95));
+        if (!blob) throw new Error('Canvas export failed');
         
-        extractedImages.push({ id: i, url });
+        if (extractedImages.length < MAX_PREVIEW_IMAGES) {
+          const url = URL.createObjectURL(blob);
+          extractedImages.push({ id: i, url });
+        }
         zip.file(`page-${i}.jpg`, blob);
+        canvas.width = 1;
+        canvas.height = 1;
+        page.cleanup();
       }
 
-      setImages(extractedImages);
-      extractedImages = [];
       setProgress(85);
       
       const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -96,6 +129,8 @@ export default function PdfToImg({ setError }) {
         if (prev) URL.revokeObjectURL(prev);
         return zipUrl;
       });
+      setImages(extractedImages);
+      extractedImages = [];
       setProgress(100);
       
       const toast = document.getElementById('success-toast');
@@ -104,8 +139,10 @@ export default function PdfToImg({ setError }) {
     } catch (error) {
       console.error(error);
       extractedImages.forEach(img => URL.revokeObjectURL(img.url));
-      setError(t.errorExtractingImages);
+      setError(getPdfErrorMessage(error, t) || t.errorExtractingImages);
     } finally {
+      await pdf?.destroy?.();
+      if (!pdf) await loadingTask?.destroy?.();
       setTimeout(() => setIsProcessing(false), 500);
     }
   };
@@ -168,6 +205,11 @@ export default function PdfToImg({ setError }) {
       {images.length > 0 && (
         <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
           <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>{t.extractedImagesPreview}</h3>
+          {pdfFile && images.length === MAX_PREVIEW_IMAGES && (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '1rem', fontSize: '0.9rem' }}>
+              {t.pdfSafetyNote}
+            </p>
+          )}
           <div className="images-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
             {images.map((img) => (
               <div key={img.id} className="image-card" style={{ position: 'relative' }}>

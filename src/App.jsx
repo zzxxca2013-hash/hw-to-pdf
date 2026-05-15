@@ -5,6 +5,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStr
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
+import { bytesToMb, getRuntimeLimits, isAcceptedImageFile } from './utils/fileLimits';
 import SortableImageItem from './components/SortableImageItem';
 const ImageCropper = lazy(() => import('./components/ImageCropper'));
 const MergePdf = lazy(() => import('./components/MergePdf'));
@@ -230,10 +231,50 @@ function App() {
   };
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
+  const getImageSize = useCallback((file) => new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Invalid image'));
+    };
+    img.src = url;
+  }), []);
+
   const onDrop = useCallback(async (acceptedFiles) => {
-    if (images.length + acceptedFiles.length > 100) {
-      setError(t.upload.maxError);
+    const limits = getRuntimeLimits();
+    const files = acceptedFiles.filter(isAcceptedImageFile);
+
+    if (files.length !== acceptedFiles.length) {
+      setError(t.errorUnsupportedFile);
       return;
+    }
+
+    if (images.length + files.length > limits.maxImages) {
+      setError(t.errorMaxImagesDynamic.replace('{max}', limits.maxImages));
+      return;
+    }
+
+    for (const file of files) {
+      if (file.size > limits.maxImageFileSize) {
+        setError(t.errorImageTooLarge.replace('{max}', bytesToMb(limits.maxImageFileSize)).replace('{side}', limits.maxImageSide));
+        return;
+      }
+
+      try {
+        const { width, height } = await getImageSize(file);
+        if (Math.max(width, height) > limits.maxImageSide) {
+          setError(t.errorImageTooLarge.replace('{max}', bytesToMb(limits.maxImageFileSize)).replace('{side}', limits.maxImageSide));
+          return;
+        }
+      } catch {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
     }
 
     setError(null);
@@ -250,7 +291,7 @@ function App() {
       };
 
       const compressedFiles = await Promise.all(
-        acceptedFiles.map(async (file) => {
+        files.map(async (file) => {
           try {
             return await imageCompression(file, options);
           } catch (error) {
@@ -269,18 +310,19 @@ function App() {
       
       setImages(prev => [...prev, ...newImages]);
       
-      if (acceptedFiles.length > 0) {
-        setFileName(prev => prev ? prev : acceptedFiles[0].name.replace(/\.[^/.]+$/, ""));
+      if (files.length > 0) {
+        setFileName(prev => prev ? prev : files[0].name.replace(/\.[^/.]+$/, ""));
       }
     } catch {
       setError(t.messages.errorProcessing);
     } finally {
       setIsProcessing(false);
     }
-  }, [clearPdfResult, images, t.messages.errorProcessing, t.upload.maxError]);
+  }, [clearPdfResult, getImageSize, images, t.errorImageTooLarge, t.errorMaxImagesDynamic, t.errorUnsupportedFile, t.messages.errorProcessing]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: {
       'image/jpeg': [],
       'image/png': [],

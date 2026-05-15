@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
@@ -9,6 +9,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, isPdfFile } from '../utils/fileLimits';
 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -67,12 +68,23 @@ export default function OrganizePdf({ setError }) {
   const [progress, setProgress] = useState(0);
   const [pages, setPages] = useState([]);
   const [resultPdfUrl, setResultPdfUrl] = useState(null);
+  const pagesRef = useRef([]);
 
   useEffect(() => {
     return () => {
       if (resultPdfUrl) URL.revokeObjectURL(resultPdfUrl);
     };
   }, [resultPdfUrl]);
+
+  useEffect(() => {
+    pagesRef.current = pages;
+  }, [pages]);
+
+  useEffect(() => {
+    return () => {
+      pagesRef.current.forEach(page => URL.revokeObjectURL(page.url));
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -82,25 +94,42 @@ export default function OrganizePdf({ setError }) {
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
+      const limits = getRuntimeLimits();
+
+      if (!isPdfFile(file)) {
+        setError(t.errorUnsupportedFile);
+        return;
+      }
+
+      if (file.size > limits.maxPdfFileSize) {
+        setError(t.errorFileTooLarge.replace('{max}', bytesToMb(limits.maxPdfFileSize)));
+        return;
+      }
+
+      pagesRef.current.forEach(page => URL.revokeObjectURL(page.url));
+      pagesRef.current = [];
+      setPages([]);
       setPdfFile(file);
       setResultPdfUrl(null);
       setIsProcessing(true);
       setProgress(10);
+      let loadingTask = null;
+      let pdf = null;
+      const extractedPages = [];
       
       try {
         const arrayBuffer = await file.arrayBuffer();
         setOriginalPdfBytes(arrayBuffer);
         
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        pdf = await loadingTask.promise;
         const numPages = pdf.numPages;
         
-        if (numPages > 150) {
+        if (numPages > limits.maxPdfPages) {
           setError(t.errorMaxPagesOrganize);
           setIsProcessing(false);
           return;
         }
-
-        const extractedPages = [];
 
         for (let i = 1; i <= numPages; i++) {
           setProgress(10 + Math.round(((i - 1) / numPages) * 80));
@@ -114,24 +143,33 @@ export default function OrganizePdf({ setError }) {
 
           await page.render({ canvasContext: context, viewport: viewport }).promise;
           
-          const url = canvas.toDataURL('image/jpeg', 0.8);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+          if (!blob) throw new Error('Canvas export failed');
+          const url = URL.createObjectURL(blob);
           extractedPages.push({ id: `page-${i}-${Date.now()}`, originalIndex: i - 1, url });
+          canvas.width = 1;
+          canvas.height = 1;
+          page.cleanup();
         }
 
         setPages(extractedPages);
         setProgress(100);
       } catch (err) {
         console.error(err);
-        setError(t.errorReadingFile);
+        extractedPages?.forEach?.(page => URL.revokeObjectURL(page.url));
+        setError(getPdfErrorMessage(err, t) || t.errorReadingFile);
         setPdfFile(null);
       } finally {
+        await pdf?.destroy?.();
+        if (!pdf) await loadingTask?.destroy?.();
         setTimeout(() => setIsProcessing(false), 500);
       }
     }
-  }, [setError, t.errorMaxPagesOrganize, t.errorReadingFile]);
+  }, [setError, t]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDropRejected: () => setError(t.errorUnsupportedFile),
     accept: { 'application/pdf': ['.pdf'] },
     multiple: false,
     noClick: !!pdfFile
@@ -153,7 +191,11 @@ export default function OrganizePdf({ setError }) {
   };
 
   const removePage = (id) => {
-    setPages(prev => prev.filter(p => p.id !== id));
+    setPages(prev => {
+      const removed = prev.find(p => p.id === id);
+      if (removed) URL.revokeObjectURL(removed.url);
+      return prev.filter(p => p.id !== id);
+    });
     setResultPdfUrl(null);
   };
 
@@ -191,7 +233,7 @@ export default function OrganizePdf({ setError }) {
       
     } catch (err) {
       console.error(err);
-      setError(t.errorGeneratingNewPdf);
+      setError(getPdfErrorMessage(err, t) || t.errorGeneratingNewPdf);
     } finally {
       setTimeout(() => setIsProcessing(false), 500);
     }
@@ -223,7 +265,7 @@ export default function OrganizePdf({ setError }) {
                 <FileStack size={20} className="text-primary" />
                 <span style={{ fontWeight: '500' }}>{pdfFile.name}</span>
               </div>
-              <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); setPdfFile(null); setPages([]); setResultPdfUrl(null); setOriginalPdfBytes(null); }}>
+              <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); pagesRef.current.forEach(page => URL.revokeObjectURL(page.url)); pagesRef.current = []; setPdfFile(null); setPages([]); setResultPdfUrl(null); setOriginalPdfBytes(null); }}>
                 <Trash2 size={16} /> {t.changeFile}
               </button>
             </div>

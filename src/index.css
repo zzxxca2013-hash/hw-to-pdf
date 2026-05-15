@@ -928,4 +928,17 @@ body::before {
   .hide-on-mobile {
     display: none;
   }
+
+  .card-actions {
+    opacity: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%);
+  }
+
+  .image-card:hover {
+    transform: none;
+  }
+
+  .image-card:hover img {
+    transform: none;
+  }
 }
