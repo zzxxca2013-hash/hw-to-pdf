@@ -18,6 +18,21 @@ export default defineConfig({
         pdf2img: resolve(__dirname, 'pdf2img/index.html'),
         organize: resolve(__dirname, 'organize/index.html'),
         compress: resolve(__dirname, 'compress/index.html')
+      },
+      output: {
+        manualChunks(id) {
+          if (id.includes('jspdf') || id.includes('pdfjs-dist')) {
+            return 'vendor-pdf';
+          }
+
+          if (id.includes('jszip') || id.includes('browser-image-compression')) {
+            return 'vendor-utils';
+          }
+
+          if (id.includes('react') || id.includes('react-dom') || id.includes('lucide-react')) {
+            return 'vendor-ui';
+          }
+        }
       }
     }
   },

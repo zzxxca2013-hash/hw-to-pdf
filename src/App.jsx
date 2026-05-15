@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { jsPDF } from 'jspdf';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
-import imageCompression from 'browser-image-compression';
-import confetti from 'canvas-confetti';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
 import SortableImageItem from './components/SortableImageItem';
@@ -252,6 +249,8 @@ function App() {
     setIsProcessing(true);
 
     try {
+      const { default: imageCompression } = await import('browser-image-compression');
+      
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
@@ -457,6 +456,11 @@ function App() {
     clearPdfResult();
 
     try {
+      const [{ jsPDF }, { default: confetti }] = await Promise.all([
+        import('jspdf'),
+        import('canvas-confetti')
+      ]);
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
