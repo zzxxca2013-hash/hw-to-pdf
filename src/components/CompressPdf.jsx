@@ -86,7 +86,8 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
       const scale = scaleMap[compressionLevel];
 
       const pdfDoc = new jsPDF({ orientation: 'portrait', unit: 'mm' });
-      pdfDoc.deletePage(1); // Remove default blank page
+      const pdfWidth = pdfDoc.internal.pageSize.getWidth();
+      const minPdfHeight = pdfDoc.internal.pageSize.getHeight();
 
       for (let i = 1; i <= numPages; i++) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 85));
@@ -110,10 +111,9 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
           if (!blob) throw new Error('Canvas export failed');
           const imageBytes = new Uint8Array(await blob.arrayBuffer());
 
-          const pdfWidth = pdfDoc.internal.pageSize.getWidth();
           const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-          pdfDoc.addPage([pdfWidth, Math.max(pdfHeight, pdfDoc.internal.pageSize.getHeight())]);
+          pdfDoc.addPage([pdfWidth, Math.max(pdfHeight, minPdfHeight)]);
           pdfDoc.addImage(imageBytes, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
         } finally {
           if (canvas) {
@@ -125,6 +125,9 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
       }
 
       setProgress(95);
+      if (pdfDoc.getNumberOfPages() > 1) {
+        pdfDoc.deletePage(1);
+      }
       const blob = pdfDoc.output('blob');
       const url = URL.createObjectURL(blob);
       setResultPdfUrl(url);
