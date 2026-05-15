@@ -38,7 +38,7 @@ const parsePageRanges = (value, pageCount) => {
   return { pages: selected };
 };
 
-export default function SplitPdf({ setError }) {
+export default function SplitPdf({ setError, setGlobalProcessing = () => {} }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
@@ -52,6 +52,11 @@ export default function SplitPdf({ setError }) {
       if (resultUrl) URL.revokeObjectURL(resultUrl);
     };
   }, [resultUrl]);
+
+  useEffect(() => {
+    setGlobalProcessing(isProcessing);
+    return () => setGlobalProcessing(false);
+  }, [isProcessing, setGlobalProcessing]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {

@@ -3,11 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>Redirecting...</title>
-  <!-- SEO friendly redirect -->
-  <meta http-equiv="refresh" content="0; URL='/hw-to-pdf/'" />
   <script type="text/javascript">
-    // Instant redirect fallback
-    window.location.replace("/hw-to-pdf/");
+    var path = window.location.pathname;
+    var match = path.match(/\/hw-to-pdf\/(privacy|terms|contact)\/?$/);
+    window.location.replace(match ? "/hw-to-pdf/?page=" + match[1] : "/hw-to-pdf/");
   </script>
 </head>
 <body>

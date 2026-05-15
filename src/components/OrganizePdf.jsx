@@ -59,7 +59,7 @@ const SortablePageItem = ({ id, url, index, onRemove }) => {
   );
 };
 
-export default function OrganizePdf({ setError }) {
+export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
@@ -75,6 +75,11 @@ export default function OrganizePdf({ setError }) {
       if (resultPdfUrl) URL.revokeObjectURL(resultPdfUrl);
     };
   }, [resultPdfUrl]);
+
+  useEffect(() => {
+    setGlobalProcessing(isProcessing);
+    return () => setGlobalProcessing(false);
+  }, [isProcessing, setGlobalProcessing]);
 
   useEffect(() => {
     pagesRef.current = pages;

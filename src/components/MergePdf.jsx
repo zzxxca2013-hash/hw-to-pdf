@@ -44,7 +44,7 @@ const SortablePdfItem = ({ pdf, index, onRemove, t }) => {
   );
 };
 
-export default function MergePdf({ setError }) {
+export default function MergePdf({ setError, setGlobalProcessing = () => {} }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfs, setPdfs] = useState([]);
@@ -61,6 +61,11 @@ export default function MergePdf({ setError }) {
       if (resultUrl) URL.revokeObjectURL(resultUrl);
     };
   }, [resultUrl]);
+
+  useEffect(() => {
+    setGlobalProcessing(isProcessing);
+    return () => setGlobalProcessing(false);
+  }, [isProcessing, setGlobalProcessing]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0) return; // Prevent processing if no files dropped

@@ -14,7 +14,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const MAX_PREVIEW_IMAGES = 24;
 
-export default function PdfToImg({ setError }) {
+export default function PdfToImg({ setError, setGlobalProcessing = () => {} }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
@@ -28,6 +28,11 @@ export default function PdfToImg({ setError }) {
       if (resultZipUrl) URL.revokeObjectURL(resultZipUrl);
     };
   }, [resultZipUrl]);
+
+  useEffect(() => {
+    setGlobalProcessing(isProcessing);
+    return () => setGlobalProcessing(false);
+  }, [isProcessing, setGlobalProcessing]);
 
   useEffect(() => {
     return () => {

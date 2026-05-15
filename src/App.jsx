@@ -5,7 +5,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStr
 import { Moon, Sun, Languages, Download, Trash2, ImagePlus, FileDown, X, Plus, DownloadCloud, Share2, Printer, Camera, WifiOff, ArrowDownAZ, Layers, Scissors, FileImage, ListOrdered, Minimize2 } from 'lucide-react';
 import { translations } from './translations';
 import { saveDraft, loadDraft, clearDraft } from './utils/db';
-import { bytesToMb, getRuntimeLimits, isAcceptedImageFile, pixelsToMegapixels } from './utils/fileLimits';
+import { bytesToMb, getRuntimeLimits, isAcceptedImageFile, isHeicFile, pixelsToMegapixels } from './utils/fileLimits';
 import SortableImageItem from './components/SortableImageItem';
 const ImageCropper = lazy(() => import('./components/ImageCropper'));
 const MergePdf = lazy(() => import('./components/MergePdf'));
@@ -26,6 +26,11 @@ const TOOL_PATHS = {
   organize: 'organize/',
   compress: 'compress/',
 };
+const SUPPORT_PAGE_PATHS = {
+  privacy: 'privacy/',
+  terms: 'terms/',
+  contact: 'contact/',
+};
 
 function App() {
 
@@ -45,6 +50,7 @@ function App() {
   const [quality, setQuality] = useLocalStorage('hw-pdf-quality', 0.9);
   const [blackAndWhite, setBlackAndWhite] = useLocalStorage('hw-pdf-bw', false);
   const [scannerMode, setScannerMode] = useLocalStorage('hw-pdf-scanner', false);
+  const [toolBusy, setToolBusy] = useState(false);
   
   const getSmartFilename = (targetLang = lang) => {
     const d = new Date();
@@ -54,7 +60,7 @@ function App() {
 
   const [fileName, setFileName] = useState(() => getSmartFilename(lang));
   const [watermark, setWatermark] = useLocalStorage('hw-pdf-watermark', '');
-  const getInitialTool = () => {
+  const getInitialTool = useCallback(() => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
       if (path.includes('/merge/')) return 'merge';
@@ -64,15 +70,44 @@ function App() {
       if (path.includes('/compress/')) return 'compress';
     }
     return 'img2pdf';
-  };
+  }, []);
+  const getInitialPage = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const queryPage = params.get('page');
+      if (SUPPORT_PAGE_PATHS[queryPage]) return queryPage;
+
+      const path = window.location.pathname;
+      if (path.includes('/privacy/')) return 'privacy';
+      if (path.includes('/terms/')) return 'terms';
+      if (path.includes('/contact/')) return 'contact';
+    }
+    return 'home';
+  }, []);
   const [activeTool, setActiveTool] = useState(getInitialTool());
 
   const handleToolChange = (tool) => {
+    if (isProcessing || toolBusy) {
+      setError(t.messages.processingInProgress);
+      return;
+    }
     setActiveTool(tool);
+    setActivePage('home');
     window.history.pushState({}, '', tool === 'img2pdf' ? '/hw-to-pdf/' : `/hw-to-pdf/${tool}/`);
   };
+  const handlePageChange = (page) => {
+    if ((isProcessing || toolBusy) && page !== activePage) {
+      setError(t.messages.processingInProgress);
+      return;
+    }
+    setActivePage(page);
+    const path = page === 'home'
+      ? (activeTool === 'img2pdf' ? '/hw-to-pdf/' : `/hw-to-pdf/${activeTool}/`)
+      : `/hw-to-pdf/${SUPPORT_PAGE_PATHS[page]}`;
+    window.history.pushState({}, '', path);
+  };
   const [croppingImageId, setCroppingImageId] = useState(null);
-  const [activePage, setActivePage] = useState('home');
+  const [activePage, setActivePage] = useState(getInitialPage);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -85,6 +120,11 @@ function App() {
   const previewModalRef = useModalFocus(showPreviewModal, () => setShowPreviewModal(false));
 
   const t = translations[lang];
+  const errorHeicUnsupported = t.errorHeicUnsupported;
+  const errorImageTooLarge = t.errorImageTooLarge;
+  const errorMaxImagesDynamic = t.errorMaxImagesDynamic;
+  const errorUnsupportedFile = t.errorUnsupportedFile;
+  const errorImageProcessing = t.messages.errorProcessing;
   const draftSuccessMessageRef = useRef(t.messages.success);
   const imagesRef = useRef(images);
   const pdfUrlRef = useRef(pdfUrl);
@@ -96,6 +136,26 @@ function App() {
     });
     setPdfBlob(null);
   }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveTool(getInitialTool());
+      setActivePage(getInitialPage());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [getInitialPage, getInitialTool]);
+
+  useEffect(() => {
+    if (!isProcessing && !toolBusy) return undefined;
+
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isProcessing, toolBusy]);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -122,9 +182,16 @@ function App() {
   }, [lang]);
 
   useEffect(() => {
-    const canonicalUrl = `${SITE_URL}${TOOL_PATHS[activeTool] || ''}`;
-    const title = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
-    const description = activeTool === 'img2pdf' ? t.common.subtitle : t.tools[activeTool]?.subtitle;
+    const isSupportPage = activePage !== 'home';
+    const canonicalUrl = isSupportPage
+      ? `${SITE_URL}${SUPPORT_PAGE_PATHS[activePage] || ''}`
+      : `${SITE_URL}${TOOL_PATHS[activeTool] || ''}`;
+    const title = isSupportPage
+      ? t.nav[activePage === 'privacy' ? 'privacyPolicy' : activePage === 'terms' ? 'termsOfUse' : 'contactUs']
+      : activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
+    const description = isSupportPage
+      ? (activePage === 'privacy' ? t.privacyText : activePage === 'terms' ? t.termsText : t.contactText)
+      : activeTool === 'img2pdf' ? t.common.subtitle : t.tools[activeTool]?.subtitle;
 
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl);
     document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonicalUrl);
@@ -133,7 +200,7 @@ function App() {
     document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
     document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
-  }, [activeTool, t]);
+  }, [activePage, activeTool, t]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -193,7 +260,9 @@ function App() {
 
   // Dynamic Tab Title
   useEffect(() => {
-    const currentTitle = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
+    const currentTitle = activePage !== 'home'
+      ? t.nav[activePage === 'privacy' ? 'privacyPolicy' : activePage === 'terms' ? 'termsOfUse' : 'contactUs']
+      : activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
     document.title = currentTitle;
 
     const handleVisibilityChange = () => {
@@ -205,7 +274,7 @@ function App() {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lang, t, activeTool]);
+  }, [lang, t, activeTool, activePage]);
 
   // Welcome Toast for new users
   useEffect(() => {
@@ -275,22 +344,28 @@ function App() {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     const limits = getRuntimeLimits();
+    const heicFile = acceptedFiles.find(isHeicFile);
+    if (heicFile) {
+      setError(errorHeicUnsupported);
+      return;
+    }
+
     const files = acceptedFiles.filter(isAcceptedImageFile);
 
     if (files.length !== acceptedFiles.length) {
-      setError(t.errorUnsupportedFile);
+      setError(errorUnsupportedFile);
       return;
     }
 
     if (images.length + files.length > limits.maxImages) {
-      setError(t.errorMaxImagesDynamic.replace('{max}', limits.maxImages));
+      setError(errorMaxImagesDynamic.replace('{max}', limits.maxImages));
       return;
     }
 
     for (const file of files) {
       if (file.size > limits.maxImageFileSize) {
         setError(
-          t.errorImageTooLarge
+          errorImageTooLarge
             .replace('{max}', bytesToMb(limits.maxImageFileSize))
             .replace('{side}', limits.maxImageSide)
             .replace('{pixels}', pixelsToMegapixels(limits.maxImagePixels))
@@ -303,7 +378,7 @@ function App() {
         const totalPixels = width * height;
         if (Math.max(width, height) > limits.maxImageSide || totalPixels > limits.maxImagePixels) {
           setError(
-            t.errorImageTooLarge
+            errorImageTooLarge
               .replace('{max}', bytesToMb(limits.maxImageFileSize))
               .replace('{side}', limits.maxImageSide)
               .replace('{pixels}', pixelsToMegapixels(limits.maxImagePixels))
@@ -311,7 +386,7 @@ function App() {
           return;
         }
       } catch {
-        setError(t.errorUnsupportedFile);
+        setError(errorUnsupportedFile);
         return;
       }
     }
@@ -353,15 +428,18 @@ function App() {
         setFileName(prev => prev ? prev : files[0].name.replace(/\.[^/.]+$/, ""));
       }
     } catch {
-      setError(t.messages.errorProcessing);
+      setError(errorImageProcessing);
     } finally {
       setIsProcessing(false);
     }
-  }, [clearPdfResult, getImageSize, images, t.errorImageTooLarge, t.errorMaxImagesDynamic, t.errorUnsupportedFile, t.messages.errorProcessing]);
+  }, [clearPdfResult, errorHeicUnsupported, errorImageProcessing, errorImageTooLarge, errorMaxImagesDynamic, errorUnsupportedFile, getImageSize, images.length]);
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    onDropRejected: () => setError(t.errorUnsupportedFile),
+    onDropRejected: (fileRejections) => {
+      const hasHeic = fileRejections.some(({ file }) => isHeicFile(file));
+      setError(hasHeic ? errorHeicUnsupported : errorUnsupportedFile);
+    },
     accept: {
       'image/jpeg': [],
       'image/png': [],
@@ -719,7 +797,8 @@ function App() {
                 key={tool.id}
                 href={`/hw-to-pdf/${tool.id === 'img2pdf' ? '' : tool.id + '/'}`} 
                 className={`btn ${activeTool === tool.id ? 'btn-primary' : ''}`} 
-                style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                aria-disabled={isProcessing || toolBusy}
+                style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isProcessing || toolBusy) && activeTool !== tool.id ? 0.6 : 1 }} 
                 onClick={(e) => { e.preventDefault(); handleToolChange(tool.id); }}
               >
                 <tool.icon size={18} /> {lang === 'ar' ? tool.ar : tool.en}
@@ -875,11 +954,11 @@ function App() {
           )}
 
           <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}><div className="spinner"></div></div>}> {/* This Suspense is for lazy-loaded components */}
-            {activeTool === 'merge' && <MergePdf setError={setError} />}
-            {activeTool === 'split' && <SplitPdf setError={setError} />}
-            {activeTool === 'pdf2img' && <PdfToImg setError={setError} />}
-            {activeTool === 'organize' && <OrganizePdf setError={setError} />}
-            {activeTool === 'compress' && <CompressPdf setError={setError} />}
+            {activeTool === 'merge' && <MergePdf setError={setError} setGlobalProcessing={setToolBusy} />}
+            {activeTool === 'split' && <SplitPdf setError={setError} setGlobalProcessing={setToolBusy} />}
+            {activeTool === 'pdf2img' && <PdfToImg setError={setError} setGlobalProcessing={setToolBusy} />}
+            {activeTool === 'organize' && <OrganizePdf setError={setError} setGlobalProcessing={setToolBusy} />}
+            {activeTool === 'compress' && <CompressPdf setError={setError} setGlobalProcessing={setToolBusy} />}
           </Suspense>
 
           {/* SEO and FAQ sections (always rendered if on home page, not dependent on lazy loading) */}
@@ -938,7 +1017,7 @@ function App() {
         </>
       ) : (
         <div className="page-content glass-panel" style={{ padding: '2.5rem', textAlign: 'start', minHeight: '50vh' }}>
-          <button className="btn btn-primary" onClick={() => setActivePage('home')} style={{ marginBottom: '2rem' }}>{t.nav.home}</button>
+          <a href={activeTool === 'img2pdf' ? '/hw-to-pdf/' : `/hw-to-pdf/${activeTool}/`} className="btn btn-primary" onClick={(e) => { e.preventDefault(); handlePageChange('home'); }} style={{ marginBottom: '2rem' }}>{t.nav.home}</a>
           <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>
             {activePage === 'privacy' ? t.nav.privacyPolicy : activePage === 'terms' ? t.nav.termsOfUse : t.nav.contactUs}
           </h2>
@@ -1093,9 +1172,9 @@ function App() {
       {/* Footer */}
       <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <button type="button" className="footer-link" onClick={() => setActivePage('privacy')}>{t.nav.privacyPolicy}</button>
-          <button type="button" className="footer-link" onClick={() => setActivePage('terms')}>{t.nav.termsOfUse}</button>
-          <button type="button" className="footer-link" onClick={() => setActivePage('contact')}>{t.nav.contactUs}</button>
+          <a className="footer-link" href="/hw-to-pdf/privacy/" onClick={(e) => { e.preventDefault(); handlePageChange('privacy'); }}>{t.nav.privacyPolicy}</a>
+          <a className="footer-link" href="/hw-to-pdf/terms/" onClick={(e) => { e.preventDefault(); handlePageChange('terms'); }}>{t.nav.termsOfUse}</a>
+          <a className="footer-link" href="/hw-to-pdf/contact/" onClick={(e) => { e.preventDefault(); handlePageChange('contact'); }}>{t.nav.contactUs}</a>
           <button type="button" className="footer-link footer-link-primary" onClick={handleShareApp}>{t.actions.shareApp}</button>
         </div>
         <p>© {new Date().getFullYear()} {t.common.title}. All rights reserved.</p>

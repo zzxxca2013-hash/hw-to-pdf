@@ -10,7 +10,7 @@ import { bytesToMb, getPdfErrorMessage, getRuntimeLimits, getSafeCanvasScale, is
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-export default function CompressPdf({ setError }) {
+export default function CompressPdf({ setError, setGlobalProcessing = () => {} }) {
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
@@ -25,6 +25,11 @@ export default function CompressPdf({ setError }) {
       if (resultPdfUrl) URL.revokeObjectURL(resultPdfUrl);
     };
   }, [resultPdfUrl]);
+
+  useEffect(() => {
+    setGlobalProcessing(isProcessing);
+    return () => setGlobalProcessing(false);
+  }, [isProcessing, setGlobalProcessing]);
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length > 0) {

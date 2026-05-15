@@ -38,6 +38,12 @@ export const isAcceptedImageFile = (file) => (
   ['image/jpeg', 'image/png', 'image/webp'].includes(file?.type)
 );
 
+export const isHeicFile = (file) => {
+  const name = file?.name || '';
+  const type = file?.type || '';
+  return /image\/hei[cf]/i.test(type) || /\.(hei[cf])$/i.test(name);
+};
+
 export const getPdfErrorMessage = (error, t) => {
   const message = `${error?.name || ''} ${error?.message || ''}`.toLowerCase();
 
