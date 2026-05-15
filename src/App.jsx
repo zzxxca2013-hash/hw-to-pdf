@@ -63,12 +63,14 @@ useEffect(() => {
 
   const handleToolChange = (tool) => {
     setActiveTool(tool);
-    let path = '/hw-to-pdf/';
-    if (tool === 'merge') path = '/hw-to-pdf/merge-pdf/';
-    if (tool === 'split') path = '/hw-to-pdf/split-pdf/';
-    if (tool === 'pdf2img') path = '/hw-to-pdf/pdf-to-image/';
-    if (tool === 'organize') path = '/hw-to-pdf/organize-pdf/';
-    if (tool === 'compress') path = '/hw-to-pdf/compress-pdf/';
+    const toolPaths = {
+      merge: '/hw-to-pdf/merge-pdf/',
+      split: '/hw-to-pdf/split-pdf/',
+      pdf2img: '/hw-to-pdf/pdf-to-image/',
+      organize: '/hw-to-pdf/organize-pdf/',
+      compress: '/hw-to-pdf/compress-pdf/',
+    };
+    const path = toolPaths[tool] || '/hw-to-pdf/';
     window.history.pushState({}, '', path);
   };
   const [croppingImageId, setCroppingImageId] = useState(null);
@@ -271,7 +273,7 @@ useEffect(() => {
       );
 
       const newImages = compressedFiles.map(file => ({
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         file,
         previewUrl: URL.createObjectURL(file),
         rotation: 0
@@ -553,10 +555,10 @@ useEffect(() => {
           files: [file]
         });
       } catch (err) {
-        console.error('Share failed:', err);
+        if (err.name !== 'AbortError') console.error('Share failed:', err);
       }
     } else {
-      alert(t.shareNotSupported);
+      setError(t.shareNotSupported);
     }
   };
 
@@ -580,10 +582,11 @@ useEffect(() => {
           url: window.location.href
         });
       } catch (err) {
-        console.error('Share App failed:', err);
+        if (err.name !== 'AbortError') console.error('Share App failed:', err);
       }
     } else {
-      alert(t.messages.copyLinkToShare + window.location.href);
+      navigator.clipboard.writeText(window.location.href);
+      setSuccess(t.messages.copyLinkToShare + window.location.href);
     }
   };
 
@@ -630,24 +633,24 @@ useEffect(() => {
           </div>
 
           <div className="tool-nav glass-panel" style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', marginBottom: '2rem', overflowX: 'auto', borderRadius: 'var(--radius)', whiteSpace: 'nowrap' }}>
-            <a href="/hw-to-pdf/" className={`btn ${activeTool === 'img2pdf' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('img2pdf'); }}>
-              <ImagePlus size={18} /> {lang === 'ar' ? 'صور إلى PDF' : 'Image to PDF'}
-            </a>
-            <a href="/hw-to-pdf/merge/" className={`btn ${activeTool === 'merge' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('merge'); }}>
-              <Layers size={18} /> {lang === 'ar' ? 'دمج PDF' : 'Merge PDF'}
-            </a>
-            <a href="/hw-to-pdf/split/" className={`btn ${activeTool === 'split' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('split'); }}>
-              <Scissors size={18} /> {lang === 'ar' ? 'فصل PDF' : 'Split PDF'}
-            </a>
-            <a href="/hw-to-pdf/pdf2img/" className={`btn ${activeTool === 'pdf2img' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('pdf2img'); }}>
-              <FileImage size={18} /> {lang === 'ar' ? 'PDF لصور' : 'PDF to JPG'}
-            </a>
-            <a href="/hw-to-pdf/organize/" className={`btn ${activeTool === 'organize' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('organize'); }}>
-              <ListOrdered size={18} /> {lang === 'ar' ? 'ترتيب PDF' : 'Organize'}
-            </a>
-            <a href="/hw-to-pdf/compress/" className={`btn ${activeTool === 'compress' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => { e.preventDefault(); handleToolChange('compress'); }}>
-              <Minimize2 size={18} /> {lang === 'ar' ? 'ضغط PDF' : 'Compress'}
-            </a>
+            {[
+              { id: 'img2pdf', icon: ImagePlus, ar: 'صور إلى PDF', en: 'Image to PDF' },
+              { id: 'merge', icon: Layers, ar: 'دمج PDF', en: 'Merge PDF' },
+              { id: 'split', icon: Scissors, ar: 'فصل PDF', en: 'Split PDF' },
+              { id: 'pdf2img', icon: FileImage, ar: 'PDF لصور', en: 'PDF to JPG' },
+              { id: 'organize', icon: ListOrdered, ar: 'ترتيب PDF', en: 'Organize' },
+              { id: 'compress', icon: Minimize2, ar: 'ضغط PDF', en: 'Compress' },
+            ].map((tool) => (
+              <a 
+                key={tool.id}
+                href={`/hw-to-pdf/${tool.id === 'img2pdf' ? '' : tool.id}`} 
+                className={`btn ${activeTool === tool.id ? 'btn-primary' : ''}`} 
+                style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
+                onClick={(e) => { e.preventDefault(); handleToolChange(tool.id); }}
+              >
+                <tool.icon size={18} /> {lang === 'ar' ? tool.ar : tool.en}
+              </a>
+            ))}
           </div>
 
           {activeTool === 'img2pdf' && (
@@ -771,7 +774,7 @@ useEffect(() => {
                     </a>
                     
                     {typeof navigator !== 'undefined' && navigator.canShare && (
-                      <button className="btn" style={{ background: '#3b82f6', color: 'white' }} onClick={handleShare}>
+                      <button className="btn" style={{ background: 'var(--primary-color)', color: 'white' }} onClick={handleShare}>
                         <Share2 size={22} />
                         {t.actions.share}
                       </button>
@@ -1000,7 +1003,7 @@ useEffect(() => {
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowPreviewModal(false)}>
                 {t.actions.close}
               </button>
-              <button className="btn" style={{ background: '#0ea5e9', color: 'white' }} onClick={handlePrint}>
+              <button className="btn" style={{ background: 'var(--primary-hover)', color: 'white' }} onClick={handlePrint}>
                 <Printer size={20} />
                 {t.actions.print}
               </button>
