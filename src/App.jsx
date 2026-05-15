@@ -57,15 +57,7 @@ function App() {
 
   const handleToolChange = (tool) => {
     setActiveTool(tool);
-    const toolPaths = {
-      merge: '/hw-to-pdf/merge/',
-      split: '/hw-to-pdf/split/',
-      pdf2img: '/hw-to-pdf/pdf2img/',
-      organize: '/hw-to-pdf/organize/',
-      compress: '/hw-to-pdf/compress/',
-    };
-    const path = toolPaths[tool] || '/hw-to-pdf/';
-    window.history.pushState({}, '', path);
+    window.history.pushState({}, '', tool === 'img2pdf' ? '/hw-to-pdf/' : `/hw-to-pdf/${tool}/`);
   };
   const [croppingImageId, setCroppingImageId] = useState(null);
   const [activePage, setActivePage] = useState('home');
@@ -179,7 +171,7 @@ function App() {
       if (document.hidden) {
         document.title = lang === 'ar' ? 'لا تنسَ تحويل واجبك! 📚' : 'Don\'t forget your homework! 📚';
       } else {
-        document.title = activeTool === 'img2pdf' ? t.common.title : t.tools[activeTool]?.title;
+        document.title = currentTitle;
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);

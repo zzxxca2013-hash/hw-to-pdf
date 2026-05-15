@@ -68,10 +68,10 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content glass-panel">
+      <div className="modal-content glass-panel" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
         <div className="modal-header">
-          <h3>{t.cropImage}</h3>
-          <button className="icon-button" onClick={onCancel}>
+          <h3 id="crop-dialog-title">{t.cropImage}</h3>
+          <button className="icon-button" onClick={onCancel} aria-label={t.cancel}>
             <X size={20} />
           </button>
         </div>

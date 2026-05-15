@@ -42,6 +42,7 @@ const SortablePageItem = ({ id, url, index, onRemove }) => {
           style={{ width: '30px', height: '30px', padding: '0', background: 'var(--error-color)', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           onPointerDown={(e) => e.stopPropagation()}
+          aria-label={`Remove page ${index}`}
         >
           <Trash2 size={16} />
         </button>
@@ -206,7 +207,7 @@ export default function OrganizePdf({ setError }) {
           {t.organizeSubtitle}
         </p>
 
-        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
+        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps({ 'aria-label': t.dragPdfHere })} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
           <input {...getInputProps()} />
           {!pdfFile ? (
             <div className="dropzone-content">

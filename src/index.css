@@ -193,6 +193,17 @@ body::before {
   box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
 }
 
+.btn:focus-visible,
+.icon-button:focus-visible,
+.action-btn:focus-visible,
+.dropzone:focus-visible,
+.add-more-card:focus-visible,
+.toggle-container:focus-visible,
+.setting-row:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
 /* Ad Banner */
 .ad-banner {
   width: 100%;
@@ -548,6 +559,10 @@ body::before {
 }
 
 .image-card:hover .card-actions {
+  opacity: 1;
+}
+
+.image-card:focus-within .card-actions {
   opacity: 1;
 }
 

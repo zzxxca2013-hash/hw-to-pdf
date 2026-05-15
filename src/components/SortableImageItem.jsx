@@ -13,15 +13,13 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
     isDragging,
   } = useSortable({ id });
 
-  // Assuming 'lang' is available from a context or prop, or default to 'en'
-  const t = translations.en; // Fallback, ideally passed as prop or context
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 999 : 'auto',
   };
+  const t = translations.en;
 
   return (
     <div ref={setNodeRef} style={style} className={`image-card ${enhanced ? 'enhanced' : ''} ${scanner ? 'scanner' : ''}`} {...attributes} {...listeners}>

@@ -90,7 +90,7 @@ export default function SplitPdf({ setError }) {
           {t.splitPdfDesc}
         </p>
 
-        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
+        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps({ 'aria-label': t.dragPdfHere })} style={{ minHeight: pdfFile ? 'auto' : '200px' }}>
           <input {...getInputProps()} />
           {!pdfFile ? (
             <div className="dropzone-content">

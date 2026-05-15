@@ -99,7 +99,7 @@ export default function MergePdf({ setError }) {
           {t.mergeSubtitle}
         </p>
 
-        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps()} style={{ minHeight: pdfs.length > 0 ? 'auto' : '200px' }}>
+        <div className={`dropzone ${isDragActive ? 'drag-active' : ''}`} {...getRootProps({ 'aria-label': t.dragPdfFilesHere })} style={{ minHeight: pdfs.length > 0 ? 'auto' : '200px' }}>
           <input {...getInputProps()} />
           {pdfs.length === 0 ? (
             <div className="dropzone-content">
@@ -119,7 +119,7 @@ export default function MergePdf({ setError }) {
                     {pdf.name}
                   </span>
                   <div className="card-actions">
-                    <button className="icon-button danger" onClick={(e) => { e.stopPropagation(); removePdf(pdf.id); }}>
+                    <button className="icon-button danger" onClick={(e) => { e.stopPropagation(); removePdf(pdf.id); }} aria-label={t.removeFile}>
                       <Trash2 size={16} />
                     </button>
                   </div>
