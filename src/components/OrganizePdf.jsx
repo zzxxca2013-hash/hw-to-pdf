@@ -63,7 +63,6 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
   const [lang] = useLocalStorage('hw-pdf-lang', 'ar');
   const t = translations[lang] || translations.en;
   const [pdfFile, setPdfFile] = useState(null);
-  const [originalPdfBytes, setOriginalPdfBytes] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pages, setPages] = useState([]);
@@ -124,7 +123,6 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
       
       try {
         const arrayBuffer = await file.arrayBuffer();
-        setOriginalPdfBytes(arrayBuffer);
         
         loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         pdf = await loadingTask.promise;
@@ -139,22 +137,29 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
         for (let i = 1; i <= numPages; i++) {
           setProgress(10 + Math.round(((i - 1) / numPages) * 80));
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 0.5 }); // Low scale for faster thumbnails
-          
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
+          let canvas = null;
 
-          await page.render({ canvasContext: context, viewport: viewport }).promise;
-          
-          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
-          if (!blob) throw new Error('Canvas export failed');
-          const url = URL.createObjectURL(blob);
-          extractedPages.push({ id: `page-${i}-${Date.now()}`, originalIndex: i - 1, url });
-          canvas.width = 1;
-          canvas.height = 1;
-          page.cleanup();
+          try {
+            const viewport = page.getViewport({ scale: 0.5 }); // Low scale for faster thumbnails
+            
+            canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
+            if (!blob) throw new Error('Canvas export failed');
+            const url = URL.createObjectURL(blob);
+            extractedPages.push({ id: `page-${i}-${Date.now()}`, originalIndex: i - 1, url });
+          } finally {
+            if (canvas) {
+              canvas.width = 1;
+              canvas.height = 1;
+            }
+            page.cleanup();
+          }
         }
 
         setPages(extractedPages);
@@ -214,7 +219,8 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
     setProgress(20);
     
     try {
-      const sourcePdf = await PDFDocument.load(originalPdfBytes);
+      const sourcePdfBytes = await pdfFile.arrayBuffer();
+      const sourcePdf = await PDFDocument.load(sourcePdfBytes);
       const newPdf = await PDFDocument.create();
       
       const pageIndicesToCopy = pages.map(p => p.originalIndex);
@@ -270,7 +276,7 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
                 <FileStack size={20} className="text-primary" />
                 <span style={{ fontWeight: '500' }}>{pdfFile.name}</span>
               </div>
-              <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); pagesRef.current.forEach(page => URL.revokeObjectURL(page.url)); pagesRef.current = []; setPdfFile(null); setPages([]); setResultPdfUrl(null); setOriginalPdfBytes(null); }}>
+              <button className="btn btn-danger" onClick={(e) => { e.stopPropagation(); pagesRef.current.forEach(page => URL.revokeObjectURL(page.url)); pagesRef.current = []; setPdfFile(null); setPages([]); setResultPdfUrl(null); }}>
                 <Trash2 size={16} /> {t.changeFile}
               </button>
             </div>
