@@ -18,7 +18,9 @@ export const translations = {
         seoText: "Easily combine multiple PDF files into one single document. Our free PDF merger tool runs entirely offline in your browser, guaranteeing absolute privacy.",
         faq: [
           { q: "How do I merge PDF files offline?", a: "Upload your PDFs, drag to reorder them, and click 'Merge PDFs'. It runs directly in your browser without uploading to any server." },
-          { q: "Is the PDF merging tool free?", a: "Yes, it is 100% free with no limits." }
+          { q: "Is the PDF merging tool free?", a: "Yes, it is 100% free with no limits." },
+          { q: "Can I control the order before merging?", a: "Yes. Add the PDFs in the order you want, remove any unwanted file, then generate one combined document." },
+          { q: "Will merging change the original PDF files?", a: "No. The tool creates a new merged PDF and keeps your original files unchanged on your device." }
         ]
       },
       split: {
@@ -30,7 +32,9 @@ export const translations = {
         seoText: "Extract specific pages or separate a large PDF document into smaller pieces. A secure, fast, and local PDF splitting tool.",
         faq: [
           { q: "How to extract pages from a PDF?", a: "Upload your PDF, enter the page numbers you want to keep (e.g., 1-5, 8), and click 'Extract Pages'." },
-          { q: "Are my files safe?", a: "Absolutely. We do not upload your PDF. All splitting is done locally on your device." }
+          { q: "Are my files safe?", a: "Absolutely. We do not upload your PDF. All splitting is done locally on your device." },
+          { q: "What do I receive after splitting?", a: "You receive a ZIP file containing the extracted PDF pages, making it easy to download and share them together." },
+          { q: "Can I split large PDFs?", a: "Yes, but very large files are limited to protect your browser memory and keep the tool stable." }
         ]
       },
       pdf2img: {
@@ -40,7 +44,9 @@ export const translations = {
         seoText: "Turn all pages of your PDF document into high-quality JPG images. Perfect for sharing homework or presentations as pictures.",
         faq: [
           { q: "How to convert PDF to Images?", a: "Upload the PDF file, and we will automatically extract all pages as high-quality JPG images which you can download as a ZIP." },
-          { q: "Do I need internet to convert?", a: "No, the conversion process works completely offline using your browser's processing power." }
+          { q: "Do I need internet to convert?", a: "No, the conversion process works completely offline using your browser's processing power." },
+          { q: "What image format is generated?", a: "Pages are exported as JPG images, which are easy to share in messaging apps, email, and school platforms." },
+          { q: "Can I preview the extracted pages?", a: "Yes. After conversion, the tool shows a preview of the extracted page images before download." }
         ]
       },
       organize: {
@@ -50,7 +56,9 @@ export const translations = {
         seoText: "Sort, rearrange, and remove pages from your PDF files easily. Just drag and drop pages into your desired order.",
         faq: [
           { q: "How can I delete pages from a PDF?", a: "Upload the PDF in the Organize tool, click the trash icon on the pages you want to delete, and save the new PDF." },
-          { q: "How do I rearrange pages?", a: "Simply drag the page thumbnails and drop them in the correct order, then save." }
+          { q: "How do I rearrange pages?", a: "Simply drag the page thumbnails and drop them in the correct order, then save." },
+          { q: "Does organizing overwrite my file?", a: "No. Your original file stays untouched, and the tool downloads a new organized PDF." },
+          { q: "Can I remove multiple pages?", a: "Yes. Delete every page you do not need, keep at least one page, and save the cleaned PDF." }
         ]
       },
       compress: {
@@ -60,7 +68,9 @@ export const translations = {
         seoText: "Reduce the file size of your PDF documents instantly without losing quality. Ideal for email attachments and fast sharing.",
         faq: [
           { q: "How to reduce PDF file size?", a: "Upload your PDF to our compressor, select the compression level, and we will reduce the file size securely within your browser." },
-          { q: "Does compressing a PDF affect its quality?", a: "We use smart compression that reduces size while maintaining readable quality, though text may become flattened images." }
+          { q: "Does compressing a PDF affect its quality?", a: "We use smart compression that reduces size while maintaining readable quality, though text may become flattened images." },
+          { q: "Which compression level should I choose?", a: "Use low compression for clearer pages, medium for everyday sharing, and high when the smallest file size matters most." },
+          { q: "Can I see how much space was saved?", a: "Yes. After compression, the tool shows the original size, new size, and saved percentage." }
         ]
       }
     },
@@ -172,7 +182,9 @@ export const translations = {
         seoText: "قم بدمج عدة ملفات PDF في مستند واحد بسهولة. أداة دمج الـ PDF الخاصة بنا تعمل بالكامل بدون إنترنت داخل متصفحك، مما يضمن خصوصيتك المطلقة.",
         faq: [
           { q: "كيف أقوم بدمج ملفات PDF بدون إنترنت؟", a: "قم برفع ملفاتك، رتبها بالسحب والإفلات، واضغط 'دمج'. العملية تتم بالكامل على جهازك دون رفعها لأي سيرفر." },
-          { q: "هل الأداة مجانية بالكامل؟", a: "نعم، الأداة مجانية 100% وبدون أي قيود أو علامات مائية." }
+          { q: "هل الأداة مجانية بالكامل؟", a: "نعم، الأداة مجانية 100% وبدون أي قيود أو علامات مائية." },
+          { q: "هل يمكنني التحكم بترتيب الملفات قبل الدمج؟", a: "نعم، أضف ملفات PDF بالترتيب المناسب، واحذف أي ملف غير مطلوب، ثم أنشئ ملفاً واحداً مدمجاً." },
+          { q: "هل يتم تعديل الملفات الأصلية؟", a: "لا، تبقى ملفاتك الأصلية كما هي على جهازك، ويتم إنشاء ملف PDF جديد للتحميل." }
         ]
       },
       split: {
@@ -184,7 +196,9 @@ export const translations = {
         seoText: "استخرج صفحات معينة أو قم بتجزئة ملف PDF كبير إلى أجزاء أصغر. أداة آمنة وسريعة وتعمل محلياً.",
         faq: [
           { q: "كيف أستخرج صفحات معينة من PDF؟", a: "ارفع الملف، واكتب أرقام الصفحات التي تريدها (مثال: 1-5, 8)، ثم اضغط 'استخراج الصفحات'." },
-          { q: "هل ملفاتي في أمان؟", a: "بالتأكيد. لا يتم رفع ملفاتك أبداً، وتتم عملية التقسيم محلياً على جهازك." }
+          { q: "هل ملفاتي في أمان؟", a: "بالتأكيد. لا يتم رفع ملفاتك أبداً، وتتم عملية التقسيم محلياً على جهازك." },
+          { q: "ماذا أحصل عليه بعد التقسيم؟", a: "تحصل على ملف ZIP يحتوي على صفحات PDF المستخرجة، ليسهل تحميلها ومشاركتها دفعة واحدة." },
+          { q: "هل يمكن تقسيم ملفات PDF كبيرة؟", a: "نعم، لكن توجد حدود للصفحات لحماية ذاكرة المتصفح والحفاظ على استقرار الأداة." }
         ]
       },
       pdf2img: {
@@ -194,7 +208,9 @@ export const translations = {
         seoText: "قم بتحويل جميع صفحات ملف الـ PDF إلى صور عالية الجودة بصيغة JPG. مثالية لمشاركة الواجبات أو العروض التقديمية كصور.",
         faq: [
           { q: "كيف أحول الـ PDF إلى صور؟", a: "ارفع ملف الـ PDF، وسنقوم تلقائياً باستخراج جميع الصفحات كصور عالية الدقة لتتمكن من تحميلها كملف مضغوط (ZIP)." },
-          { q: "هل أحتاج للإنترنت للتحويل؟", a: "لا، تعمل الأداة بالكامل بدون إنترنت بمجرد تحميل الصفحة." }
+          { q: "هل أحتاج للإنترنت للتحويل؟", a: "لا، تعمل الأداة بالكامل بدون إنترنت بمجرد تحميل الصفحة." },
+          { q: "ما صيغة الصور الناتجة؟", a: "يتم استخراج الصفحات بصيغة JPG المناسبة للمشاركة عبر البريد والتطبيقات التعليمية وتطبيقات المحادثة." },
+          { q: "هل يمكنني معاينة الصور قبل التحميل؟", a: "نعم، بعد التحويل تظهر معاينة للصفحات المستخرجة قبل تحميل ملف ZIP." }
         ]
       },
       organize: {
@@ -204,7 +220,9 @@ export const translations = {
         seoText: "قم بفرز وتغيير ترتيب صفحات ملفاتك، أو احذف الصفحات غير المرغوب فيها بسهولة تامة عن طريق السحب والإفلات.",
         faq: [
           { q: "كيف يمكنني حذف صفحة من ملف PDF؟", a: "ارفع الملف في أداة الترتيب، واضغط على أيقونة سلة المهملات الموجودة على الصفحة التي تريد حذفها، ثم احفظ الملف الجديد." },
-          { q: "كيف أعيد ترتيب الصفحات؟", a: "بكل بساطة، اسحب الصور المصغرة للصفحات وضعها في الترتيب الصحيح، ثم اضغط حفظ." }
+          { q: "كيف أعيد ترتيب الصفحات؟", a: "بكل بساطة، اسحب الصور المصغرة للصفحات وضعها في الترتيب الصحيح، ثم اضغط حفظ." },
+          { q: "هل يتم استبدال الملف الأصلي؟", a: "لا، يتم إنشاء ملف PDF جديد بعد الترتيب، بينما يبقى الملف الأصلي كما هو على جهازك." },
+          { q: "هل يمكن حذف أكثر من صفحة؟", a: "نعم، احذف كل الصفحات غير المطلوبة، واترك صفحة واحدة على الأقل، ثم احفظ الملف النهائي." }
         ]
       },
       compress: {
@@ -214,7 +232,9 @@ export const translations = {
         seoText: "قم بتقليل حجم ملفات الـ PDF لتسهيل إرسالها عبر الواتساب أو البريد الإلكتروني. عملية ضغط سريعة وآمنة ومجانية بالكامل.",
         faq: [
           { q: "كيف أقوم بتصغير حجم ملف PDF؟", a: "اسحب الملف وضعه في أداة الضغط، اختر مستوى الضغط المناسب، وسيتم تقليص حجم الملف فوراً داخل متصفحك." },
-          { q: "هل يؤثر الضغط على جودة الملف؟", a: "نستخدم خوارزمية ضغط ذكية تحافظ على الدقة، ولكن قد يتم تحويل النصوص إلى صور مسطحة مما يقلل الحجم بشكل كبير." }
+          { q: "هل يؤثر الضغط على جودة الملف؟", a: "نستخدم خوارزمية ضغط ذكية تحافظ على الدقة، ولكن قد يتم تحويل النصوص إلى صور مسطحة مما يقلل الحجم بشكل كبير." },
+          { q: "أي مستوى ضغط أختار؟", a: "اختر الضغط المنخفض للحفاظ على وضوح أعلى، والمتوسط للاستخدام اليومي، والعالي عندما يكون أصغر حجم هو الأهم." },
+          { q: "هل تظهر نسبة التوفير بعد الضغط؟", a: "نعم، بعد انتهاء الضغط ستظهر لك معلومات الحجم الأصلي والحجم الجديد ونسبة التوفير." }
         ]
       }
     },

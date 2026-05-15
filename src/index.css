@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Alexandria:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;800&display=swap');
-
 :root {
   --primary-color: #6366f1;
   --primary-hover: #4f46e5;
@@ -194,6 +192,7 @@ body::before {
 }
 
 .btn:focus-visible,
+.btn:focus-within,
 .icon-button:focus-visible,
 .action-btn:focus-visible,
 .dropzone:focus-visible,
@@ -202,6 +201,18 @@ body::before {
 .setting-row:focus-visible {
   outline: 3px solid var(--primary-color);
   outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Ad Banner */
@@ -347,6 +358,13 @@ body::before {
   gap: 1rem;
   cursor: pointer;
   user-select: none;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--text-main);
+  font: inherit;
+  padding: 0;
+  text-align: start;
 }
 
 .setting-input-group {
@@ -367,6 +385,12 @@ body::before {
   cursor: pointer;
   user-select: none;
   font-weight: 500;
+  background: transparent;
+  border: 0;
+  color: var(--text-main);
+  font: inherit;
+  padding: 0;
+  text-align: start;
 }
 
 .toggle-switch {
@@ -718,6 +742,25 @@ body::before {
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--border-color);
   background-color: rgba(0,0,0,0.02);
+}
+
+.footer-link {
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--primary-color);
+}
+
+.footer-link-primary {
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
 .spinner {

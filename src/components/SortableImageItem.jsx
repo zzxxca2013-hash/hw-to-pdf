@@ -31,6 +31,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           title={t.cropImage}
+          aria-label={t.cropImage}
         >
           <Crop size={18} />
         </button>
@@ -41,6 +42,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           title={t.rotateImage}
+          aria-label={t.rotateImage}
         >
           <RotateCw size={18} />
         </button>
@@ -51,6 +53,7 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
           onTouchStart={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           title={t.removeFile}
+          aria-label={t.removeFile}
         >
           <X size={18} />
         </button>

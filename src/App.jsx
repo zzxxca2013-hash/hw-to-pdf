@@ -621,7 +621,7 @@ function App() {
 
       {activePage === 'home' ? (
         <>
-          <div className={`toast ${error ? 'show error' : success ? 'show success' : ''}`}>
+          <div className={`toast ${error ? 'show error' : success ? 'show success' : ''}`} role={error ? 'alert' : 'status'} aria-live="polite">
             {error || success}
           </div>
 
@@ -651,6 +651,7 @@ function App() {
 
 
           <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexDirection: 'column' }}>
+            <input type="file" accept="image/*" capture="environment" id="cameraInput" style={{ display: 'none' }} onChange={handleCameraChange} multiple />
             <div {...getRootProps()} className={`dropzone glass-panel ${isDragActive ? 'active' : ''} ${images.length === 0 ? 'empty-state' : ''}`} style={{ marginBottom: 0 }}>
               <input {...getInputProps()} />
               <ImagePlus className="dropzone-icon" />
@@ -660,7 +661,6 @@ function App() {
             
             {images.length === 0 && (
               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <input type="file" accept="image/*" capture="environment" id="cameraInput" style={{ display: 'none' }} onChange={handleCameraChange} multiple />
                 <label htmlFor="cameraInput" className="btn btn-primary" style={{ cursor: 'pointer', padding: '0.8rem 1.5rem', borderRadius: '20px' }}>
                   <Camera size={20} />
                   {t.takePhoto}
@@ -673,26 +673,26 @@ function App() {
             <>
               <div className="toolbar glass-panel">
                 <div className="toolbar-toggles">
-                  <div className="toggle-container" onClick={() => { setScannerMode(!scannerMode); if (!scannerMode) { setEnhance(false); setBlackAndWhite(false); } }}>
+                  <button type="button" className="toggle-container" aria-pressed={scannerMode} onClick={() => { setScannerMode(!scannerMode); if (!scannerMode) { setEnhance(false); setBlackAndWhite(false); } }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.scanner}</span>
-                    <div className={`toggle-switch ${scannerMode ? 'active' : ''}`}>
-                      <div className="toggle-knob"></div>
-                    </div>
-                  </div>
+                    <span className={`toggle-switch ${scannerMode ? 'active' : ''}`} aria-hidden="true">
+                      <span className="toggle-knob"></span>
+                    </span>
+                  </button>
                   
-                  <div className="toggle-container" onClick={() => { setEnhance(!enhance); if (!enhance) setScannerMode(false); }}>
+                  <button type="button" className="toggle-container" aria-pressed={enhance} onClick={() => { setEnhance(!enhance); if (!enhance) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.enhance}</span>
-                    <div className={`toggle-switch ${enhance ? 'active' : ''}`}>
-                      <div className="toggle-knob"></div>
-                    </div>
-                  </div>
+                    <span className={`toggle-switch ${enhance ? 'active' : ''}`} aria-hidden="true">
+                      <span className="toggle-knob"></span>
+                    </span>
+                  </button>
                   
-                  <div className="toggle-container" onClick={() => { setBlackAndWhite(!blackAndWhite); if (!blackAndWhite) setScannerMode(false); }}>
+                  <button type="button" className="toggle-container" aria-pressed={blackAndWhite} onClick={() => { setBlackAndWhite(!blackAndWhite); if (!blackAndWhite) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.bw}</span>
-                    <div className={`toggle-switch ${blackAndWhite ? 'active' : ''}`}>
-                      <div className="toggle-knob"></div>
-                    </div>
-                  </div>
+                    <span className={`toggle-switch ${blackAndWhite ? 'active' : ''}`} aria-hidden="true">
+                      <span className="toggle-knob"></span>
+                    </span>
+                  </button>
                 </div>
 
                 <div className="toolbar-actions" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -705,7 +705,7 @@ function App() {
                     {t.upload.addMore}
                   </button> {/* This is for adding more images, not generic "Add More" */}
 
-                  <button className="icon-button" style={{ width: '32px', height: '32px', padding: 0 }} onClick={() => document.getElementById('cameraInput').click()}>
+                  <button className="icon-button" style={{ width: '32px', height: '32px', padding: 0 }} onClick={() => document.getElementById('cameraInput')?.click()} aria-label={t.takePhoto} title={t.takePhoto}>
                     <Camera size={16} />
                   </button>
 
@@ -745,10 +745,10 @@ function App() {
                         scanner={scannerMode}
                       />
                     ))}
-                      <div className="add-more-card" onClick={open}>
+                      <button type="button" className="add-more-card" onClick={open}>
                         <Plus size={40} className="add-more-icon" />
                         <span>{t.upload.addMore}</span> {/* Unify with t.upload.addMore */}
-                      </div>
+                      </button>
                   </div>
                 </SortableContext>
               </DndContext>
@@ -878,7 +878,7 @@ function App() {
 
 
       {isProcessing && (
-        <div className="loading-overlay">
+        <div className="loading-overlay" role="status" aria-live="polite" aria-busy="true">
           <div className="spinner"></div>
           <h2 style={{ marginBottom: progress > 0 ? '1rem' : '0' }}>{t.common.processing}</h2>
           {progress > 0 && (
@@ -905,22 +905,22 @@ function App() {
 
       {showSettingsModal && (
         <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{t.settingsTitle}</h3>
-              <button className="icon-button" onClick={() => setShowSettingsModal(false)}><X size={20} /></button>
+              <h3 id="settings-dialog-title">{t.settingsTitle}</h3>
+              <button className="icon-button" onClick={() => setShowSettingsModal(false)} aria-label={t.actions.close}><X size={20} /></button>
             </div>
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               
               <div className="setting-card glass-panel" style={{ padding: '1rem' }}>
-                <div className="setting-row" onClick={() => { setAddPageNumbers(!addPageNumbers); clearPdfResult(); }}>
+                <button type="button" className="setting-row" aria-pressed={addPageNumbers} onClick={() => { setAddPageNumbers(!addPageNumbers); clearPdfResult(); }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
-                  <div className={`toggle-switch ${addPageNumbers ? 'active' : ''}`}><div className="toggle-knob"></div></div>
-                </div>
-                <div className="setting-row" onClick={() => { setAddMargins(!addMargins); clearPdfResult(); }} style={{ marginTop: '1rem' }}>
+                  <span className={`toggle-switch ${addPageNumbers ? 'active' : ''}`} aria-hidden="true"><span className="toggle-knob"></span></span>
+                </button>
+                <button type="button" className="setting-row" aria-pressed={addMargins} onClick={() => { setAddMargins(!addMargins); clearPdfResult(); }} style={{ marginTop: '1rem' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addMargins}</span>
-                  <div className={`toggle-switch ${addMargins ? 'active' : ''}`}><div className="toggle-knob"></div></div>
-                </div>
+                  <span className={`toggle-switch ${addMargins ? 'active' : ''}`} aria-hidden="true"><span className="toggle-knob"></span></span>
+                </button>
                 <div className="setting-row" style={{ marginTop: '1rem', cursor: 'default' }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.pdfQuality}</span>
                   <select value={quality} onChange={(e) => { setQuality(Number(e.target.value)); clearPdfResult(); }} className="input-field" style={{ minWidth: '120px', padding: '0.4rem 0.8rem' }}>
@@ -958,13 +958,13 @@ function App() {
 
       {showClearConfirm && (
         <div className="modal-overlay" onClick={() => setShowClearConfirm(false)}>
-          <div className="modal-content" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="clear-dialog-title" aria-describedby="clear-dialog-desc" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 style={{ color: 'var(--error-color)' }}>{t.messages.confirmClearTitle}</h3>
-              <button className="icon-button" onClick={() => setShowClearConfirm(false)}><X size={20} /></button>
+              <h3 id="clear-dialog-title" style={{ color: 'var(--error-color)' }}>{t.messages.confirmClearTitle}</h3>
+              <button className="icon-button" onClick={() => setShowClearConfirm(false)} aria-label={t.actions.close}><X size={20} /></button>
             </div>
             <div style={{ padding: '1.5rem' }}>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>{t.messages.confirmClearDesc}</p>
+              <p id="clear-dialog-desc" style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6' }}>{t.messages.confirmClearDesc}</p>
             </div>
             <div className="modal-actions">
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowClearConfirm(false)}>
@@ -981,13 +981,13 @@ function App() {
 
       {showPreviewModal && pdfUrl && (
         <div className="modal-overlay" onClick={() => setShowPreviewModal(false)}>
-          <div className="modal-content" style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" style={{ width: '95vw', maxWidth: '1000px', height: '90vh' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <h3 id="preview-dialog-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 {fileName || getSmartFilename()}.pdf
                 {pdfBlob && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.6rem', borderRadius: '12px' }}>{t.ui.fileSize} {(pdfBlob.size / (1024 * 1024)).toFixed(2)} MB</span>}
               </h3>
-              <button className="icon-button" onClick={() => setShowPreviewModal(false)}><X size={20} /></button>
+              <button className="icon-button" onClick={() => setShowPreviewModal(false)} aria-label={t.actions.close}><X size={20} /></button>
             </div>
             <div style={{ flex: 1, backgroundColor: '#525659' }}>
               <iframe ref={iframeRef} src={`${pdfUrl}#toolbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
@@ -1012,10 +1012,10 @@ function App() {
       {/* Footer */}
       <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('privacy')}>{t.nav.privacyPolicy}</span>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('terms')}>{t.nav.termsOfUse}</span>
-          <span style={{ cursor: 'pointer', hover: 'var(--primary-color)' }} onClick={() => setActivePage('contact')}>{t.nav.contactUs}</span>
-          <span style={{ cursor: 'pointer', color: 'var(--primary-color)', fontWeight: '500' }} onClick={handleShareApp}>{t.actions.shareApp}</span>
+          <button type="button" className="footer-link" onClick={() => setActivePage('privacy')}>{t.nav.privacyPolicy}</button>
+          <button type="button" className="footer-link" onClick={() => setActivePage('terms')}>{t.nav.termsOfUse}</button>
+          <button type="button" className="footer-link" onClick={() => setActivePage('contact')}>{t.nav.contactUs}</button>
+          <button type="button" className="footer-link footer-link-primary" onClick={handleShareApp}>{t.actions.shareApp}</button>
         </div>
         <p>© {new Date().getFullYear()} {t.common.title}. All rights reserved.</p>
       </footer>

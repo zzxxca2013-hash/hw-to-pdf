@@ -145,17 +145,17 @@ export default function CompressPdf({ setError }) {
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             <Settings size={20} /> {t.compressionLevel}
           </h3>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
+          <div role="radiogroup" aria-label={t.compressionLevel} style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
             <label className={`btn ${compressionLevel === 'low' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'low' ? '' : 'var(--glass-bg)' }}>
-              <input type="radio" name="compression" value="low" checked={compressionLevel === 'low'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
+              <input className="visually-hidden" type="radio" name="compression" value="low" checked={compressionLevel === 'low'} onChange={(e) => setCompressionLevel(e.target.value)} />
               {t.compressionLow}
             </label>
             <label className={`btn ${compressionLevel === 'medium' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'medium' ? '' : 'var(--glass-bg)' }}>
-              <input type="radio" name="compression" value="medium" checked={compressionLevel === 'medium'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
+              <input className="visually-hidden" type="radio" name="compression" value="medium" checked={compressionLevel === 'medium'} onChange={(e) => setCompressionLevel(e.target.value)} />
               {t.compressionMedium}
             </label>
             <label className={`btn ${compressionLevel === 'high' ? 'btn-primary' : ''}`} style={{ flex: 1, minWidth: '120px', cursor: 'pointer', background: compressionLevel === 'high' ? '' : 'var(--glass-bg)' }}>
-              <input type="radio" name="compression" value="high" checked={compressionLevel === 'high'} onChange={(e) => setCompressionLevel(e.target.value)} style={{ display: 'none' }} />
+              <input className="visually-hidden" type="radio" name="compression" value="high" checked={compressionLevel === 'high'} onChange={(e) => setCompressionLevel(e.target.value)} />
               {t.compressionHigh}
             </label>
           </div>
