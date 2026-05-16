@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
   <meta charset="utf-8">
   <title>Redirecting...</title>
-  <script type="text/javascript">
-    var path = window.location.pathname;
-    var match = path.match(/\/hw-to-pdf\/(privacy|terms|contact)\/?$/);
-    window.location.replace(match ? "/hw-to-pdf/?page=" + match[1] : "/hw-to-pdf/");
+
+  <script>
+    sessionStorage.redirect = location.pathname + location.search;
+    location.replace('/hw-to-pdf/');
   </script>
 </head>
+
 <body>
-  <p>If you are not redirected, <a href="/hw-to-pdf/">click here</a>.</p>
 </body>
 </html>
