@@ -31,6 +31,67 @@ const SUPPORT_PAGE_PATHS = {
   terms: 'terms/',
   contact: 'contact/',
 };
+const FAQ_SCHEMA_SCRIPT_ID = 'faq-schema-jsonld';
+
+const normalizeFaqText = (value) => (
+  typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : ''
+);
+
+const getValidFaqItems = (faqItems) => {
+  if (!Array.isArray(faqItems)) return [];
+
+  const seen = new Set();
+
+  return faqItems.reduce((items, item) => {
+    const question = normalizeFaqText(item?.q ?? item?.name);
+    const answer = normalizeFaqText(item?.a ?? item?.acceptedAnswer?.text);
+
+    if (!question || !answer) return items;
+
+    const key = question;
+    if (seen.has(key)) return items;
+
+    seen.add(key);
+    items.push({ q: question, a: answer });
+    return items;
+  }, []);
+};
+
+const buildFaqSchema = (faqItems) => {
+  const mainEntity = getValidFaqItems(faqItems).map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: a,
+    },
+  }));
+
+  if (mainEntity.length === 0) return null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity,
+  };
+};
+
+const hasFaqSchemaType = (type) => (
+  Array.isArray(type) ? type.includes('FAQPage') : type === 'FAQPage'
+);
+
+const isFaqSchemaScript = (script) => {
+  const content = script.textContent?.trim();
+  if (!content) return false;
+
+  try {
+    const parsed = JSON.parse(content);
+    const nodes = Array.isArray(parsed) ? parsed : [parsed, ...(Array.isArray(parsed?.['@graph']) ? parsed['@graph'] : [])];
+    return nodes.some(node => hasFaqSchemaType(node?.['@type']));
+  } catch {
+    return content.includes('"FAQPage"') || content.includes("'FAQPage'");
+  }
+};
 
 function App() {
 
@@ -200,6 +261,35 @@ function App() {
     document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
     document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
+  }, [activePage, activeTool, t]);
+
+  useEffect(() => {
+    const faqSource = activePage === 'home'
+      ? (activeTool === 'img2pdf' ? t.faq : t.tools[activeTool]?.faq)
+      : null;
+    const schema = buildFaqSchema(faqSource);
+    const faqScripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
+      .filter(isFaqSchemaScript);
+    let schemaScript = document.getElementById(FAQ_SCHEMA_SCRIPT_ID);
+
+    if (!schema) {
+      faqScripts.forEach(script => script.remove());
+      return;
+    }
+
+    if (!schemaScript) {
+      schemaScript = document.createElement('script');
+      schemaScript.id = FAQ_SCHEMA_SCRIPT_ID;
+      schemaScript.type = 'application/ld+json';
+      document.head.appendChild(schemaScript);
+    }
+
+    faqScripts
+      .filter(script => script !== schemaScript)
+      .forEach(script => script.remove());
+
+    schemaScript.type = 'application/ld+json';
+    schemaScript.textContent = JSON.stringify(schema, null, 2);
   }, [activePage, activeTool, t]);
 
   useEffect(() => {
@@ -967,7 +1057,7 @@ function App() {
             const currentSeoTitle = activeTool === 'img2pdf' ? t.seoTitle : currentTool?.seoTitle;
             const currentSeoText = activeTool === 'img2pdf' ? t.seoText : currentTool?.seoText;
             const currentFaqTitle = t.faqTitle;
-            const currentFaq = activeTool === 'img2pdf' ? t.faq : currentTool?.faq;
+            const currentFaq = getValidFaqItems(activeTool === 'img2pdf' ? t.faq : currentTool?.faq);
 
             return (
               <>
@@ -980,7 +1070,7 @@ function App() {
                 )}
 
                 {/* FAQ Section */}
-                {currentFaq && (
+                {currentFaq.length > 0 && (
                   <div className="faq-section glass-panel" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'start' }}>
                     <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>{currentFaqTitle}</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -992,24 +1082,6 @@ function App() {
                       ))}
                     </div>
                   </div>
-                )}
-
-                {/* Inject Dynamic FAQ Schema for Google */}
-                {currentFaq && (
-                  <script type="application/ld+json" dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                      "@context": "https://schema.org",
-                      "@type": "FAQPage",
-                      "mainEntity": currentFaq.map(item => ({
-                        "@type": "Question",
-                        "name": item.q,
-                        "acceptedAnswer": {
-                          "@type": "Answer",
-                          "text": item.a
-                        }
-                      }))
-                    })
-                  }} />
                 )}
               </>
             );
