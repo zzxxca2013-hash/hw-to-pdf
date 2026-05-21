@@ -21,6 +21,21 @@ Since the app is built with React and Vite, you'll need Node.js installed.
 3. Run `npm run dev` to start the local development server.
 4. Open the link provided in the terminal (usually `http://localhost:5173`) in your browser.
 
+## نشر على Cloudflare Pages
+
+1. أنشئ مشروع جديد في Cloudflare Pages واربطه بهذا المستودع في GitHub.
+2. استخدم إعدادات البناء التالية:
+   - Build command: `npm run build`
+   - Build output directory: `dist`
+   - Root directory: `.`
+3. أضف أسرار GitHub التالية إلى `Settings > Secrets and variables > Actions`:
+   - `CLOUDFLARE_API_TOKEN`
+   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLARE_PROJECT_NAME`
+4. هذا المستودع يحتوي على GitHub Actions جاهزة للنشر إلى Cloudflare Pages عند كل `push` إلى فرع `main`.
+
+> بعد إنشاء مشروع Cloudflare Pages، كل `push` إلى `main` يبني وينشر الموقع تلقائياً.
+
 ## Technologies Used
 - React (UI Framework)
 - Vite (Build Tool)
