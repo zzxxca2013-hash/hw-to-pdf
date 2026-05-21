@@ -2,79 +2,297 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/hw-to-pdf/favicon.ico" />
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      href="https://pdfmaster-tools.netlify.app/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="apple-touch-icon" href="https://zzxxca2013-hash.github.io/hw-to-pdf/apple-touch-icon.png" />
+
+    <meta name="theme-color" content="#6366f1" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#6366f1"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#0f172a"
+    />
+
     <meta name="robots" content="index, follow" />
-    <meta name="description" content="Free online PDF tools to merge, split, compress, organize and convert images to PDF quickly and securely without uploading files." />
-    <meta name="keywords" content="تحويل الصور الى pdf, دمج pdf, فصل pdf, تقسيم pdf, image to pdf, merge pdf, split pdf, تحويل واجبات, jpg to pdf, png to pdf, free pdf converter">
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
-    
-    <!-- Open Graph / WhatsApp / Facebook -->
+
+    <meta name="author" content="Homework to PDF" />
+    <meta name="application-name" content="Homework to PDF" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="HW to PDF" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta
+      name="description"
+      content="أدوات PDF مجانية وسريعة لدمج وتقسيم وضغط وتحويل الصور إلى PDF مباشرة داخل المتصفح بدون رفع الملفات."
+    />
+
+    <meta
+      name="keywords"
+      content="تحويل الصور الى pdf, دمج pdf, فصل pdf, تقسيم pdf, image to pdf, merge pdf, split pdf, تحويل واجبات, jpg to pdf, png to pdf, free pdf converter"
+    />
+
+    <!-- Canonical -->
+    <link
+      rel="canonical"
+      href="https://pdfmaster-tools.netlify.app/"
+    />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
-    <meta property="og:title" content="أدوات PDF | تحويل الصور، دمج، وفصل الملفات" />
-    <meta property="og:description" content="أسهل وأسرع أداة لتحويل صور واجباتك المدرسية إلى PDF، ودمج أو فصل ملفات الـ PDF مجاناً وبأمان تام." />
-    <meta property="og:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
+
+    <meta
+      property="og:url"
+      content="https://pdfmaster-tools.netlify.app/"
+    />
+
+    <meta property="og:locale" content="ar_AR" />
+
+    <meta
+      property="og:title"
+      content="أدوات PDF مجانية | دمج وتقسيم وضغط وتحويل الصور إلى PDF"
+    />
+
+    <meta
+      property="og:description"
+      content="أسهل وأسرع أداة لتحويل الصور إلى PDF ودمج وتقسيم وضغط الملفات مباشرة داخل المتصفح وبخصوصية عالية."
+    />
+
+    <meta
+      property="og:image"
+      content="https://pdfmaster-tools.netlify.app/og-image.png"
+    />
+
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta
+      property="og:image:alt"
+      content="Homework to PDF browser-based PDF tools"
+    />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://zzxxca2013-hash.github.io/hw-to-pdf/" />
-    <meta property="twitter:title" content="أدوات PDF | تحويل الصور، دمج، وفصل الملفات" />
-    <meta property="twitter:description" content="أسهل وأسرع أداة لتحويل صور واجباتك المدرسية إلى PDF، ودمج أو فصل ملفات الـ PDF مجاناً وبأمان تام." />
-    <meta property="twitter:image" content="https://zzxxca2013-hash.github.io/hw-to-pdf/pwa-512x512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- SEO Structured Data -->
+    <meta
+      name="twitter:url"
+      content="https://pdfmaster-tools.netlify.app/"
+    />
+
+    <meta
+      name="twitter:title"
+      content="أدوات PDF مجانية | دمج وتقسيم وضغط وتحويل الصور إلى PDF"
+    />
+
+    <meta
+      name="twitter:description"
+      content="أسهل وأسرع أداة لتحويل الصور إلى PDF ودمج وتقسيم وضغط الملفات مباشرة داخل المتصفح وبخصوصية عالية."
+    />
+
+    <meta
+      name="twitter:image"
+      content="https://pdfmaster-tools.netlify.app/og-image.png"
+    />
+
+    <meta
+      name="twitter:image:alt"
+      content="Homework to PDF browser-based PDF tools"
+    />
+
+    <!-- Structured Data -->
     <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "HW to PDF Tools",
+        "url": "https://pdfmaster-tools.netlify.app/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "أسهل وأسرع أداة لترتيب وتحويل صور الواجبات المدرسية إلى ملف PDF نظيف بالإضافة إلى أدوات مجانية لدمج وفصل وتقسيم ملفات PDF."
+      }
+    </script>
+    <script id="faq-schema-jsonld" type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "HW to PDF Tools",
-      "url": "https://zzxxca2013-hash.github.io/hw-to-pdf/",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "All",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "description": "أسهل وأسرع أداة لترتيب وتحويل صور الواجبات المدرسية إلى ملف PDF نظيف، بالإضافة إلى أدوات مجانية لدمج وفصل وتقسيم ملفات الـ PDF بأمان وخصوصية."
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "كيف أقوم بتحويل الصور إلى PDF مجاناً؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "الأمر بسيط جداً! قم برفع صورك (سواء كانت بصيغة JPG أو PNG) في منطقة الرفع بالأعلى، قم بترتيبها بالسحب والإفلات، ثم اضغط على زر 'تحويل إلى PDF'. سيتم تحميل الملف مباشرة مجاناً."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف يمكنني دمج ملفات PDF في ملف واحد؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "اختر أداة 'دمج PDF' من القائمة العلوية، ثم قم برفع ملفات الـ PDF التي تريد دمجها، رتبها بالسحب والإفلات، واضغط على دمج. العملية مجانية وتتم بالكامل بدون إنترنت."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل يمكنني تقسيم ملف PDF أو استخراج صفحات معينة؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم! استخدم أداة 'فصل PDF' بالأعلى، ارفع الملف الكبير الخاص بك، حدد الصفحات التي تريد استخراجها، وسيتم إنشاء ملف PDF جديد يحتوي فقط على الصفحات المختارة."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل تحويل الواجبات ودمج الملفات آمن هنا؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ملفاتك تتم معالجتها محلياً داخل متصفحك ولا يتم رفع الصور أو ملفات PDF إلى خوادمنا. قد يحمّل الموقع خدمات خارجية مثل التحليلات أو الخطوط، لكن الملفات التي تختارها تبقى على جهازك."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل يمكنني استخدام هذه الأدوات من الجوال؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "بالتأكيد! الموقع مصمم خصيصاً ليتوافق مع جميع الهواتف الذكية. ويمكنك أيضاً تثبيته كتطبيق على شاشتك الرئيسية ليعمل بدون إنترنت."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "هل يمكنني قص وتدوير الصور قبل تحويلها؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم، بعد رفع الصورة في أداة تحويل الصور، ستجد أزراراً فوقها لقص الأجزاء غير المرغوب فيها، تدوير الصورة، وحتى تفعيل 'وضع الماسح الضوئي' لتوضيح النصوص قبل التحويل."
+          }
+        }
+      ]
     }
     </script>
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KT5D1MBWJ1"></script>
+    <!-- Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-KT5D1MBWJ1"
+    ></script>
+
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-KT5D1MBWJ1');
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      gtag("js", new Date());
+
+      gtag("config", "G-KT5D1MBWJ1");
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>Free PDF Tools Online | Merge, Split, Compress & Convert PDF</title>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/chunk-CcdRbIIE.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/preload-helper-QfQfIU51.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/typeof-DsF8qdHM.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/jspdf.es.min-BvBYj1hd.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/jsx-runtime-1g_ruwHX.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/sortable.esm-DBViWy5V.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/useLocalStorage-BK2TbYay.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/file-image-DLvaKEk0.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/download-dnwYAdr-.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/trash-2-C_JHulaq.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/x-CoWN-4RY.js"></script>
-    <script type="module" crossorigin src="/hw-to-pdf/assets/main-CPWns8Wz.js"></script>
-    <link rel="stylesheet" crossorigin href="/hw-to-pdf/assets/main-B66OUkBL.css">
-  <link rel="manifest" href="/hw-to-pdf/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/hw-to-pdf/registerSW.js"></script></head>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
+      as="style"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>
+      أدوات PDF مجانية | دمج وتقسيم وضغط وتحويل الصور إلى PDF
+    </title>
+    <script type="module" crossorigin src="/assets/rolldown-runtime-Ds3Pkvae.js"></script>
+    <script type="module" crossorigin src="/assets/vendor-jspdf-CX1pMjG2.js"></script>
+    <script type="module" crossorigin src="/assets/vendor-ui-DNjq_jUs.js"></script>
+    <script type="module" crossorigin src="/assets/sortable.esm-3tTdqcI5.js"></script>
+    <script type="module" crossorigin src="/assets/useLocalStorage-Cjc9V532.js"></script>
+    <script type="module" crossorigin src="/assets/useModalFocus-l6DgM-MM.js"></script>
+    <script type="module" crossorigin src="/assets/main-B70r2DUC.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/vendor-ui-sg0yWRLc.css">
+    <link rel="stylesheet" crossorigin href="/assets/main-DoROlV0n.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+
   <body>
-    <noscript>أداة مجانية لتحويل الصور إلى PDF ودمج وفصل الملفات. يرجى تفعيل الجافا سكريبت (JavaScript) لاستخدام الأداة بالكامل.</noscript>
-    <div id="root"></div>
+    <noscript>
+      أداة مجانية لتحويل الصور إلى PDF ودمج وفصل الملفات.
+      يرجى تفعيل JavaScript لاستخدام الموقع بالكامل.
+    </noscript>
+
+    <div id="root">
+      <main
+        class="seo-fallback"
+        dir="rtl"
+        style="
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 2rem 1.25rem;
+          font-family: system-ui, sans-serif;
+          line-height: 1.9;
+          color: #0f172a;
+        "
+      >
+        <h1>أدوات PDF مجانية تعمل داخل المتصفح</h1>
+
+        <p>
+          حوّل الصور إلى PDF وادمج الملفات واضغطها
+          ورتّب الصفحات مباشرة من جهازك بدون رفع الملفات.
+        </p>
+
+        <section aria-labelledby="home-faq">
+          <h2 id="home-faq">أسئلة شائعة</h2>
+
+          <p>
+            هل الملفات تبقى على الجهاز؟
+            نعم، جميع العمليات تتم داخل المتصفح.
+          </p>
+
+          <p>
+            ما الأدوات المتوفرة؟
+            تحويل الصور إلى PDF، دمج PDF، تقسيم PDF،
+            ضغط PDF، وترتيب الصفحات.
+          </p>
+        </section>
+      </main>
+    </div>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .catch((err) =>
+              console.error("SW registration failed:", err)
+            );
+        });
+      }
+    </script>
   </body>
 </html>
