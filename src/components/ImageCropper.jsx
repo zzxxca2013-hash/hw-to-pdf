@@ -38,16 +38,16 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
     }
 
     const image = imgRef.current;
-    
+
     // Convert percentage crop to pixel crop if needed
-    const pixelCrop = crop.unit === '%' 
+    const pixelCrop = crop.unit === '%'
       ? convertToPixelCrop(crop, image.width, image.height)
       : crop;
 
     const canvas = document.createElement('canvas');
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    
+
     canvas.width = pixelCrop.width * scaleX;
     canvas.height = pixelCrop.height * scaleY;
     const ctx = canvas.getContext('2d');
@@ -79,19 +79,19 @@ const ImageCropper = ({ imageUrl, onCropComplete, onCancel, t }) => {
             <X size={20} />
           </button>
         </div>
-        
+
         <div className="crop-container">
           <ReactCrop crop={crop} onChange={c => setCrop(c)}>
-            <img 
+            <img
               ref={imgRef}
-              src={imageUrl} 
-              alt="Crop" 
+              src={imageUrl}
+              alt="Crop"
               onLoad={onImageLoad}
               style={{ maxHeight: '60vh', maxWidth: '100%', objectFit: 'contain' }}
             />
           </ReactCrop>
         </div>
-        
+
         <div className="modal-actions">
           <button className="btn btn-danger" onClick={onCancel} style={{ padding: '0.6rem 1rem' }}>
             <X size={18} />

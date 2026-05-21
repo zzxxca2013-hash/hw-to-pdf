@@ -132,7 +132,7 @@ export default function MergePdf({ setError, setGlobalProcessing = () => {} }) {
     setProgress(10);
     try {
       const mergedPdf = await PDFDocument.create();
-      
+
       for (let i = 0; i < pdfs.length; i++) {
         const file = pdfs[i].file;
         const arrayBuffer = await file.arrayBuffer();
@@ -157,7 +157,7 @@ export default function MergePdf({ setError, setGlobalProcessing = () => {} }) {
         return url;
       });
       setProgress(100);
-      
+
       const toast = document.getElementById('success-toast');
       if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 

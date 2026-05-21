@@ -38,8 +38,8 @@ const SortablePageItem = ({ id, url, index, onRemove }) => {
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div style={{ position: 'absolute', top: '-10px', right: '-10px', zIndex: 10 }}>
-        <button 
-          className="icon-button danger" 
+        <button
+          className="icon-button danger"
           style={{ width: '30px', height: '30px', padding: '0', background: 'var(--error-color)', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           onPointerDown={(e) => e.stopPropagation()}
@@ -120,14 +120,14 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
       let loadingTask = null;
       let pdf = null;
       const extractedPages = [];
-      
+
       try {
         const arrayBuffer = await file.arrayBuffer();
-        
+
         loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
         pdf = await loadingTask.promise;
         const numPages = pdf.numPages;
-        
+
         if (numPages > limits.maxPdfPages) {
           setError(t.errorMaxPagesOrganize);
           setIsProcessing(false);
@@ -141,14 +141,14 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
 
           try {
             const viewport = page.getViewport({ scale: 0.5 }); // Low scale for faster thumbnails
-            
+
             canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
             await page.render({ canvasContext: context, viewport: viewport }).promise;
-            
+
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.8));
             if (!blob) throw new Error('Canvas export failed');
             const url = URL.createObjectURL(blob);
@@ -214,34 +214,34 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
       setError(t.errorMinOnePage);
       return;
     }
-    
+
     setIsProcessing(true);
     setProgress(20);
-    
+
     try {
       const sourcePdfBytes = await pdfFile.arrayBuffer();
       const sourcePdf = await PDFDocument.load(sourcePdfBytes);
       const newPdf = await PDFDocument.create();
-      
+
       const pageIndicesToCopy = pages.map(p => p.originalIndex);
       const copiedPages = await newPdf.copyPages(sourcePdf, pageIndicesToCopy);
-      
+
       copiedPages.forEach(page => newPdf.addPage(page));
-      
+
       setProgress(80);
       const pdfBytes = await newPdf.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      
+
       setResultPdfUrl(prev => {
         if (prev) URL.revokeObjectURL(prev);
         return url;
       });
       setProgress(100);
-      
+
       const toast = document.getElementById('success-toast');
       if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
-      
+
     } catch (err) {
       console.error(err);
       setError(getPdfErrorMessage(err, t) || t.errorGeneratingNewPdf);
@@ -299,12 +299,12 @@ export default function OrganizePdf({ setError, setGlobalProcessing = () => {} }
             <SortableContext items={pages.map(p => p.id)} strategy={rectSortingStrategy}>
               <div className="images-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '1.5rem' }}>
                 {pages.map((page, index) => (
-                  <SortablePageItem 
-                    key={page.id} 
-                    id={page.id} 
-                    url={page.url} 
-                    index={index + 1} 
-                    onRemove={() => removePage(page.id)} 
+                  <SortablePageItem
+                    key={page.id}
+                    id={page.id}
+                    url={page.url}
+                    index={index + 1}
+                    onRemove={() => removePage(page.id)}
                   />
                 ))}
               </div>

@@ -112,7 +112,7 @@ function App() {
   const [blackAndWhite, setBlackAndWhite] = useLocalStorage('hw-pdf-bw', false);
   const [scannerMode, setScannerMode] = useLocalStorage('hw-pdf-scanner', false);
   const [toolBusy, setToolBusy] = useState(false);
-  
+
   const getSmartFilename = (targetLang = lang) => {
     const d = new Date();
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -487,7 +487,7 @@ function App() {
 
     try {
       const { default: imageCompression } = await import('browser-image-compression');
-      
+
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
@@ -511,9 +511,9 @@ function App() {
         previewUrl: URL.createObjectURL(file),
         rotation: 0
       }));
-      
+
       setImages(prev => [...prev, ...newImages]);
-      
+
       if (files.length > 0) {
         setFileName(prev => prev ? prev : files[0].name.replace(/\.[^/.]+$/, ""));
       }
@@ -556,7 +556,7 @@ function App() {
   };
 
   const rotateImage = (id) => {
-    setImages(prev => prev.map(img => 
+    setImages(prev => prev.map(img =>
       img.id === id ? { ...img, rotation: (img.rotation + 90) % 360 } : img
     ));
     clearPdfResult();
@@ -590,7 +590,7 @@ function App() {
       const blob = await res.blob();
       const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
       const newPreviewUrl = URL.createObjectURL(file);
-      
+
       setImages(prev => prev.map(img => {
         if (img.id === croppingImageId) {
           URL.revokeObjectURL(img.previewUrl); // Revoke old URL
@@ -619,7 +619,7 @@ function App() {
   const handleDragEnd = (event) => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(40);
     const { active, over } = event;
-    
+
     if (!over) return; // Prevent crash if dropped outside valid area
 
     if (active.id !== over.id) {
@@ -639,7 +639,7 @@ function App() {
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
+
         if (rotation % 180 !== 0) {
           canvas.width = img.height;
           canvas.height = img.width;
@@ -647,10 +647,10 @@ function App() {
           canvas.width = img.width;
           canvas.height = img.height;
         }
-        
+
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((rotation * Math.PI) / 180);
-        
+
         let filterStr = '';
         if (scannerMode) {
           filterStr += 'grayscale(100%) contrast(1.6) brightness(1.1) ';
@@ -659,11 +659,11 @@ function App() {
           if (blackAndWhite) filterStr += 'grayscale(100%) ';
         }
         if (filterStr) ctx.filter = filterStr.trim();
-        
+
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
-        
+
         if (watermark) {
-          ctx.setTransform(1, 0, 0, 1, 0, 0); 
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.translate(canvas.width / 2, canvas.height / 2);
           ctx.rotate(-Math.PI / 4);
           const fontSize = Math.floor(Math.min(canvas.width, canvas.height) / 12);
@@ -689,7 +689,7 @@ function App() {
       setError(t.messages.errorNoImages);
       return;
     }
-    
+
     setIsProcessing(true);
     setProgress(0);
     setError(null);
@@ -716,9 +716,9 @@ function App() {
         // setProcessingText(lang === 'ar' ? `جاري معالجة الصورة ${i + 1} من ${images.length}...` : `Processing image ${i + 1} of ${images.length}...`); // Old hardcoded text
         setProcessingText(t.processingImage.replace('{current}', i + 1).replace('{total}', images.length));
         if (i > 0) pdf.addPage();
-        
+
         const dataUrl = await processImageForPDF(img.previewUrl, img.rotation);
-        
+
         const margin = addMargins ? 10 : 0;
         const availableWidth = pageWidth - (margin * 2);
         const availableHeight = pageHeight - (margin * 2);
@@ -746,12 +746,12 @@ function App() {
           pdf.setTextColor(128, 128, 128);
           pdf.text(`${i + 1}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
         }
-        
+
         setProgress(Math.round(((i + 1) / images.length) * 100));
       }
 
       setProcessingText(t.messages.finalizingPdf);
-      
+
       const generatedBlob = pdf.output('blob');
       const url = URL.createObjectURL(generatedBlob);
       setPdfUrl(prev => {
@@ -760,7 +760,7 @@ function App() {
       });
       setPdfBlob(generatedBlob);
       setSuccess(t.messages.success);
-      
+
       const duration = 3000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 3000 };
@@ -773,7 +773,7 @@ function App() {
         confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
         confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
       }, 250);
-      
+
     } catch (err) {
       console.error(err);
       setError(t.messages.errorProcessing);
@@ -786,9 +786,9 @@ function App() {
 
   const handleShare = async () => {
     if (!pdfBlob) return;
-    
+
     const file = new File([pdfBlob], `${fileName || getSmartFilename()}.pdf`, { type: 'application/pdf' });
-    
+
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
@@ -883,12 +883,12 @@ function App() {
               { id: 'organize', icon: ListOrdered, ar: 'ترتيب PDF', en: 'Organize' },
               { id: 'compress', icon: Minimize2, ar: 'ضغط PDF', en: 'Compress' },
             ].map((tool) => (
-              <a 
+              <a
                 key={tool.id}
-                href={`/${tool.id === 'img2pdf' ? '' : tool.id + '/'}`} 
-                className={`btn ${activeTool === tool.id ? 'btn-primary' : ''}`} 
+                href={`/${tool.id === 'img2pdf' ? '' : tool.id + '/'}`}
+                className={`btn ${activeTool === tool.id ? 'btn-primary' : ''}`}
                 aria-disabled={isProcessing || toolBusy}
-                style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isProcessing || toolBusy) && activeTool !== tool.id ? 0.6 : 1 }} 
+                style={{ flex: 1, minWidth: 'fit-content', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: (isProcessing || toolBusy) && activeTool !== tool.id ? 0.6 : 1 }}
                 onClick={(e) => { e.preventDefault(); handleToolChange(tool.id); }}
               >
                 <tool.icon size={18} /> {lang === 'ar' ? tool.ar : tool.en}
@@ -908,7 +908,7 @@ function App() {
               <p>{t.uploadPlaceholder}</p>
               <span className="help-text">{t.uploadHelp}</span>
             </div>
-            
+
             {images.length === 0 && (
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <label htmlFor="cameraInput" className="btn btn-primary" style={{ cursor: 'pointer', padding: '0.8rem 1.5rem', borderRadius: '20px' }}>
@@ -929,14 +929,14 @@ function App() {
                       <span className="toggle-knob"></span>
                     </span>
                   </button>
-                  
+
                   <button type="button" className="toggle-container" aria-pressed={enhance} onClick={() => { setEnhance(!enhance); if (!enhance) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.enhance}</span>
                     <span className={`toggle-switch ${enhance ? 'active' : ''}`} aria-hidden="true">
                       <span className="toggle-knob"></span>
                     </span>
                   </button>
-                  
+
                   <button type="button" className="toggle-container" aria-pressed={blackAndWhite} onClick={() => { setBlackAndWhite(!blackAndWhite); if (!blackAndWhite) setScannerMode(false); }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.editor.bw}</span>
                     <span className={`toggle-switch ${blackAndWhite ? 'active' : ''}`} aria-hidden="true">
@@ -949,7 +949,7 @@ function App() {
                   <span className="image-count-text hide-on-mobile">
                     {t.ui.imageCount(images.length)}
                   </span>
-                  
+
                   <button className="btn" style={{ background: 'var(--primary-color)', color: 'white', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={open}>
                     <ImagePlus size={16} />
                     {t.upload.addMore}
@@ -982,10 +982,10 @@ function App() {
                 <SortableContext items={images.map(i => i.id)} strategy={rectSortingStrategy}>
                   <div className="images-grid">
                     {images.map((img, index) => (
-                      <SortableImageItem 
-                        key={img.id} 
-                        id={img.id} 
-                        url={img.previewUrl} 
+                      <SortableImageItem
+                        key={img.id}
+                        id={img.id}
+                        url={img.previewUrl}
                         index={index + 1}
                         onRemove={() => removeImage(img.id)}
                         onRotate={() => rotateImage(img.id)}
@@ -1015,7 +1015,7 @@ function App() {
                       <Download size={22} />
                       {t.actions.download}
                     </a>
-                    
+
                     {typeof navigator !== 'undefined' && navigator.canShare && (
                       <button className="btn" style={{ background: 'var(--primary-color)', color: 'white' }} onClick={handleShare}>
                         <Share2 size={22} />
@@ -1126,7 +1126,7 @@ function App() {
 
       {croppingImageId && (
         <Suspense fallback={null}>
-          <ImageCropper 
+          <ImageCropper
             imageUrl={images.find(img => img.id === croppingImageId)?.previewUrl}
             onCropComplete={handleCropComplete}
             onCancel={() => setCroppingImageId(null)}
@@ -1143,7 +1143,7 @@ function App() {
               <button className="icon-button" onClick={() => setShowSettingsModal(false)} aria-label={t.actions.close}><X size={20} /></button>
             </div>
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              
+
               <div className="setting-card glass-panel" style={{ padding: '1rem' }}>
                 <button type="button" className="setting-row" aria-pressed={addPageNumbers} onClick={() => { setAddPageNumbers(!addPageNumbers); clearPdfResult(); }}>
                   <span style={{ fontSize: '0.95rem', fontWeight: '500' }}>{t.addPageNumbers}</span>
@@ -1174,7 +1174,7 @@ function App() {
                 </div>
               </div>
             </div>
-            
+
             <div className="modal-actions">
               <button className="btn" style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border-color)' }} onClick={() => setShowSettingsModal(false)}>
                 {t.cancel}

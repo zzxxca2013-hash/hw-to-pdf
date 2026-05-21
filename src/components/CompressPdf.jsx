@@ -66,7 +66,7 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
     setProgress(5);
     let loadingTask = null;
     let pdf = null;
-    
+
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
       loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -91,7 +91,7 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
 
       for (let i = 1; i <= numPages; i++) {
         setProgress(5 + Math.round(((i - 1) / numPages) * 85));
-        
+
         const page = await pdf.getPage(i);
         let canvas = null;
 
@@ -131,7 +131,7 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
       const blob = pdfDoc.output('blob');
       const url = URL.createObjectURL(blob);
       setResultPdfUrl(url);
-      
+
       setStats({
         original: (pdfFile.size / (1024 * 1024)).toFixed(2),
         compressed: (blob.size / (1024 * 1024)).toFixed(2),
@@ -205,7 +205,7 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
               {t.compressionHigh}
             </label>
           </div>
-          
+
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
             {t.compressionNote}
           </p>
@@ -222,7 +222,7 @@ export default function CompressPdf({ setError, setGlobalProcessing = () => {} }
             <Check size={24} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
             {t.compressSuccess}
           </h2>
-          
+
           <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <div style={{ background: 'var(--glass-bg)', padding: '1rem', borderRadius: '12px', minWidth: '120px' }}>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{t.originalSize}</div>

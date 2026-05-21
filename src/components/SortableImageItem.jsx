@@ -24,8 +24,8 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
   return (
     <div ref={setNodeRef} style={style} className={`image-card ${enhanced ? 'enhanced' : ''} ${scanner ? 'scanner' : ''}`} {...attributes} {...listeners}>
       <div className="card-actions">
-        <button 
-          className="action-btn crop" 
+        <button
+          className="action-btn crop"
           onClick={(e) => { e.stopPropagation(); onCrop(); }}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -35,8 +35,8 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
         >
           <Crop size={18} />
         </button>
-        <button 
-          className="action-btn rotate" 
+        <button
+          className="action-btn rotate"
           onClick={(e) => { e.stopPropagation(); onRotate(); }}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -46,8 +46,8 @@ const SortableImageItem = ({ id, url, index, onRemove, onRotate, onCrop, rotatio
         >
           <RotateCw size={18} />
         </button>
-        <button 
-          className="action-btn delete" 
+        <button
+          className="action-btn delete"
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           onPointerDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}

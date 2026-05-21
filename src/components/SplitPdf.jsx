@@ -109,9 +109,9 @@ export default function SplitPdf({ setError, setGlobalProcessing = () => {} }) {
         setIsProcessing(false);
         return;
       }
-      
+
       const zip = new JSZip();
-      
+
       for (let i = 0; i < selectedPages.length; i++) {
         const pageIndex = selectedPages[i];
         const newPdf = await PDFDocument.create();
@@ -130,7 +130,7 @@ export default function SplitPdf({ setError, setGlobalProcessing = () => {} }) {
         return url;
       });
       setProgress(100);
-      
+
       const toast = document.getElementById('success-toast');
       if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 

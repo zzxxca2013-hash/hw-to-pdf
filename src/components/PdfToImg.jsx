@@ -77,7 +77,7 @@ export default function PdfToImg({ setError, setGlobalProcessing = () => {} }) {
     let extractedImages = [];
     let loadingTask = null;
     let pdf = null;
-    
+
     try {
       const arrayBuffer = await pdfFile.arrayBuffer();
       loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
@@ -129,7 +129,7 @@ export default function PdfToImg({ setError, setGlobalProcessing = () => {} }) {
       }
 
       setProgress(85);
-      
+
       const zipBlob = await zip.generateAsync({ type: 'blob', streamFiles: true });
       const zipUrl = URL.createObjectURL(zipBlob);
       setResultZipUrl(prev => {
@@ -139,7 +139,7 @@ export default function PdfToImg({ setError, setGlobalProcessing = () => {} }) {
       setImages(extractedImages);
       extractedImages = [];
       setProgress(100);
-      
+
       const toast = document.getElementById('success-toast');
       if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 
