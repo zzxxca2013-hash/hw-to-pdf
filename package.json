@@ -1,0 +1,49 @@
+{
+  "homepage": "https://pdfmaster-tools.netlify.app/",
+  "name": "hw-to-pdf",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run lint && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "test": "node --test"
+  },
+
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "browser-image-compression": "^2.0.2",
+    "canvas-confetti": "^1.9.4",
+    "jspdf": "^4.2.1",
+    "jszip": "^3.10.1",
+    "lucide-react": "^1.14.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.7.284",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-dropzone": "^15.0.0",
+    "react-image-crop": "^11.0.10"
+  },
+
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "gh-pages": "^6.3.0",
+    "globals": "^17.5.0",
+    "vite": "^8.0.10",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

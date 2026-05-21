@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pdfmaster-tools.netlify.app/sitemap.xml
