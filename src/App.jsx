@@ -17,7 +17,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useModalFocus } from './hooks/useModalFocus';
 import './index.css';
 
-const SITE_URL = 'https://pdfmaster-tools.netlify.app/';
+const SITE_URL = 'https://hw-to-pdf.pages.dev/';
 const TOOL_PATHS = {
   img2pdf: '',
   merge: 'merge/',
