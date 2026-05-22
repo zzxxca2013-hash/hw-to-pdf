@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pdfmaster-tools.netlify.app/sitemap.xml
+Sitemap: https://hw-to-pdf.pages.dev/sitemap.xml
