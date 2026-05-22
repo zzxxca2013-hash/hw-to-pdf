@@ -1,32 +1,59 @@
 # Deployment Instructions
 
-## Cloudflare Pages
+## المشكلة الحالية
 
-This project builds successfully with Vite and deploys from `dist/`.
+الصورة التي أرسلتها تظهر صفحة Cloudflare ضمن `Workers & Pages` على مشروع باسم `pdfhub`.
+هذا يعني أن المشروع الموجود في Cloudflare حالياً هو خدمة Workers/Service، وليس مشروع Cloudflare Pages.
 
-### Recommended Cloudflare Pages settings
-- Repository: `zzxxca2013-hash/hw-to-pdf`
-- Branch: `main`
-- Build command: `npm run build`
-- Build output directory: `dist`
+المستودع الذي لديك هو تطبيق Vite/React ثابت وينبغي نشره عبر:
+- Cloudflare Pages
+- أو GitHub Pages
 
-### GitHub Actions
-This repo already contains a Cloudflare Pages workflow:
+## ماذا تفعل الآن
+
+### 1. افتح GitHub Actions
+اذهب إلى مستودع `zzxxca2013-hash/hw-to-pdf` ثم:
+- اضغط `Actions`
+- ابحث عن workflows التالية:
+  - `Deploy to Cloudflare Pages`
+  - `Deploy to GitHub Pages`
+
+### 2. تأكد من وجود ملفات workflow
+يجب أن يكون لديك في المستودع:
 - `.github/workflows/deploy-cloudflare-pages.yml`
+- `.github/workflows/deploy-github-pages.yml`
 
-The workflow deploys with these secrets:
+### 3. تأكد من أسرار GitHub
+اذهب إلى `Settings` → `Secrets and variables` → `Actions` وتأكد من وجود:
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_PROJECT_NAME`
 
-`CLOUDFLARE_PROJECT_NAME` must exactly match the name of the Cloudflare Pages project in your account.
-If the workflow still fails with `Project not found`, the project name or account ID is incorrect, or the token does not have access to that Pages project.
+### 4. تأكد أن `CLOUDFLARE_PROJECT_NAME` صحيح
+افتح Cloudflare Dashboard ثم:
+- اذهب إلى `Pages`
+- شوف اسم المشروع بالضبط
+- ضع نفس الاسم في `CLOUDFLARE_PROJECT_NAME`
 
-### Recommended fallback
-If Cloudflare Pages continues to fail, this repository now also supports direct GitHub Pages deployment from `.github/workflows/deploy-github-pages.yml`.
+إذا كان النص في Cloudflare يقول `pdfhub` ونجح هذا المشروع كصفحة Pages، فضع `pdfhub`.
+إذا لم يكن هناك مشروع Pages، فأنت تحتاج إنشاء مشروع جديد في Pages وليس استخدام Workers.
 
-## Local build test
-Run these commands locally inside the project folder:
+## إذا استمر الفشل في Cloudflare Pages
+استخدم الحل البديل الجديد:
+- شغّل workflow `Deploy to GitHub Pages`
+
+هذا الحل يبني الموقع وينشره إلى GitHub Pages بدون الحاجة إلى Cloudflare.
+
+## هل تريد حل سريع الآن؟
+إذا أردت، افعل هذا مباشرة:
+1. افتح صفحة `Actions` في GitHub.
+2. اختر `Deploy to GitHub Pages`.
+3. اضغط `Run workflow`.
+
+إذا نجح، ستجد الموقع منشوراً على GitHub Pages.
+
+## اختبار محلي
+تأكد أن البناء يعمل محلياً:
 
 ```bash
 npm install
@@ -34,4 +61,4 @@ npm run build
 npm run preview
 ```
 
-If the site works locally, the Cloudflare Pages build should also succeed with the correct project name and account.
+إذا هذا يعمل، النشر يعتمد فقط على إعدادات Cloudflare أو GitHub Actions.
